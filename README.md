@@ -32,7 +32,9 @@ npm install live-server -g
 
 Make sure following files are in the right directory, according to the url:
 
-`?geo=/tmp/test_data/points.geojson&tree=/tmp/test_data/cgMLST.nwk&metadata=/tmp/test_data/cgMLST.tsv`
+```
+?geo=/tmp/test_data/points.geojson&tree=/tmp/test_data/cgMLST.nwk&metadata=/tmp/test_data/cgMLST.tsv
+```
 
 ## Dev notes
 
