@@ -1,0 +1,123 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            8.41552734375,
+            45.413876460821086
+          ]
+        },
+        "type": "Feature",
+        "properties": {
+          "mlst": "6",
+          "data": "09/07/2018",
+          "amr": "",
+          "codice": "2018.TE.22851.1.4",
+          "matrice": "MAIS DOLCE"
+        }
+      },
+      {
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            8.997802734375,
+            44.98034238084973
+          ]
+        },
+        "type": "Feature",
+        "properties": {
+          "mlst": "6",
+          "data": "09/07/2018",
+          "amr": "",
+          "codice": "2018.TE.22851.1.5",
+          "matrice": "MAIS DOLCE"
+        }
+      },
+      {
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            7.987060546875,
+            45.205263456162385
+          ]
+        },
+        "type": "Feature",
+        "properties": {
+          "mlst": "6",
+          "data": "09/07/2018",
+          "amr": "",
+          "codice": "2019.TE.4460.1.62",
+          "matrice": "MAIS DOLCE"
+        }
+      },
+      {
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            8.009033203125,
+            44.66083904265621
+          ]
+        },
+        "type": "Feature",
+        "properties": {
+          "mlst": "6",
+          "data": "09/07/2018",
+          "amr": "",
+          "codice": "2019.TE.4460.1.63",
+          "matrice": "MAIS DOLCE"
+        }
+      },
+      {
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            7.503662109375,
+            45.32897866218559
+          ]
+        },
+        "type": "Feature",
+        "properties": {
+          "mlst": "6",
+          "data": "09/07/2018",
+          "amr": "",
+          "codice": "2019.TE.4460.1.64",
+          "matrice": "MAIS DOLCE"
+        }
+      },
+      {
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            7.415771484374999,
+            44.77013681219717
+          ]
+        },
+        "type": "Feature",
+        "properties": {
+          "mlst": "6",
+          "data": "09/07/2018",
+          "amr": "",
+          "codice": "2019.TE.4460.1.65",
+          "matrice": "MAIS DOLCE"
+        }
+      },
+      {
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            13.710534,
+            42.65828
+          ]
+        },
+        "type": "Feature",
+        "properties": {
+          "mlst": "6",
+          "data": "30/09/2021",
+          "amr": "",
+          "codice": "2021.EXT.0930.1121.250"
+        }
+      }
+    ]
+  }
