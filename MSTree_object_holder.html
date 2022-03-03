@@ -468,11 +468,13 @@
 	<script charset="utf-8" src="static/js/tree/base_tree.js?version=1"></script>
 	<script charset="utf-8" src="static/js/tree/d3_m_tree.js?version=1"></script>
 	<script charset="utf-8" src="static/js/tree/grapetree_fileHandler.js?version=1"></script>
+	<script src="static/js/tree/tree_extended.js"></script>
+	<script src="static/js/tree/tree_interceptor.js"></script>
 	<!-- LeafletJS JS -->
-  <script src="static/js/leaflet.js"></script>
-	<script src="static/js/map.js"></script>
-	<script src="static/js/tree_extended.js"></script>
-	<script src="static/js/tree_interceptor.js"></script>
+  <script src="static/js/map/leaflet.js"></script>
+  <script src="static/js/map/leaflet-canvasicon.js"></script>
+  <script src="static/js/map/leaflet-piechart.js"></script>
+	<script src="static/js/map/map.js"></script>
 	<script>
 		var tree_id = null
 	</script>
@@ -738,6 +740,7 @@
 			tree.addDisplayChangedListener(function(type, data) {
 				if (type === 'category_changed') {
 					$("#metadata-select").val(data);
+					the_map.definePoints();
 				}
 
 			});
@@ -779,12 +782,13 @@
 				value: Math.log(tree.node_collapsed_value) * 1000,
 			});
 			tree.centerGraph();
+			tree.resize();
 			$(waiting_spinner.el).hide();
 			$("#waiting-information").text("Complete. Tree has " + tree.force_nodes.length + " nodes");
 			$("#waiting-image").attr("src", "static/js/img/ms_complete_1.png").show();
 			// legend_colour_chooser.hide();
 			$("#information-div").modal("hide");
-
+			the_map.initMap();
 		}
 
 		function treeLoading(tree, msg) {
@@ -875,7 +879,7 @@
 			});
 
 			// tree_interceptor(the_tree, (groupedNods) => console.log(groupedNods));
-			tree_interceptor(the_tree, (groupedNods) => findNodesInMap(groupedNods));
+			tree_interceptor(the_tree, (groupedNods) => the_map.findNodesInMap(groupedNods));
 			
 			the_tree.addSegmentOverListener(function(d) {
 				if ($("#show-node-tooltip").prop("checked")) {
@@ -1565,6 +1569,7 @@
 				graph_svg.setAttribute("width", graph_w);
 				graph_svg.getElementsByTagName("rect")[0].setAttribute("height", graph_h);
 				graph_svg.getElementsByTagName("rect")[0].setAttribute("width", graph_w);
+				the_tree.resize();
 				}, 400);
 				//console.log("h: "+ graph_h + " w: " + graph_w);
 		}
@@ -1592,6 +1597,12 @@
 				document.msExitFullscreen();
 			}
 		}
+
+		$(window).resize(function() {
+	    setTimeout(function() {
+	      the_tree.resize();
+	    }, 100);
+	  });
 	</script>
 </body>
 

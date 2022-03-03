@@ -30,6 +30,17 @@ body{
 	cursor: default;
 }
 
+#scale-svg .scale-bar {
+	text-align: center;
+	-webkit-transform: translateX(1px);
+	transform: translateX(1px);
+}
+
+#scale-svg .scale-title {
+	font-family: "OpenSans", sans-serif !important;
+	font-size: 14px;
+}
+
 #sidebar {
 		position:fixed;
 		top:0px;

@@ -16,6 +16,7 @@ let tree_interceptor = (tree, callback) => {
         for (selectedNodeID of selectedNodeIDs) {
             groupedNodes[selectedNodeID] = tree.grouped_nodes[selectedNodeID];
         }
+        console.log(groupedNodes);
         callback(groupedNodes); 
     });
 }
