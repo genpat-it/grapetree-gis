@@ -418,6 +418,40 @@
 				</div>
 			</div>
 		</div>
+
+		<!-- ADDED PANEL TO INTERACT WITH MAP -->
+		<div class='panel panel-default'>
+			<div class='panel-heading mst-menu-title' id='mst-map-menu'>
+				<b>Map</b>
+				<span id='mst-map-menu-icon' class='glyphicon glyphicon-menu-right'> </span>
+			</div>
+			<div class="panel-body" id='mst-map-menu-panel'>
+				<div class="panel-body-section">
+					<!--div class="help help-tooltip" onclick="getHelpBox('branch_labels');">
+						<img src="genpat-theme/img/iconic/help-circle.svg" alt="Suggerimento">
+					</div-->
+					<div class="aggregation-options">
+						<label>
+							<input type="radio" id="handle-aggregate-by-coordinates" name="handle-aggregation-type" value="coordinates" checked="" style="opacity: 1;"> Aggregate by coordinates
+						</label>
+					</div>
+					<div class="spinner-box">
+						<input type='text' id='spinner-mapdelta' class='spin-group'>
+					</div>
+				</div>
+				<div class="panel-body-section">
+					<div class="aggregation-options">
+						<label>
+							<input type="radio" id="handle-aggregate-by-metadata" name="handle-aggregation-type" value="metadata" style="opacity: 1;"> Aggregate by metadata
+						</label>
+					</div>
+					<select id='metadata-map-select' style="opacity: 0.5;" disabled>
+				    <option value='nothing'>No category</option>
+				  </select>
+				</div>
+			</div>
+		</div>
+
 		<div class='panel panel-default'>
 			<div class='panel-heading mst-menu-title' id='right-menu'>
 				<b id>Context Menu</b>
@@ -551,12 +585,14 @@
 			log_link_scale: false,
 			show_individual_segments: false,
 			link_font_size: 14,
+			map_delta: 8,
 			show_link_labels: false,
 			show_node_labels: false,
 			node_font_size: 12,
 			hide_link_length: "",
 			node_collapsed_value: 0
 		};
+		var changeCounter = 0;
 
 		var tooltip_div = d3.select("body")
 			.append("div")
@@ -616,23 +652,28 @@
 					label = obj;
 				}
 				var append_to_1 = $("#metadata-select");
+				var append_to_1_map = $("#metadata-map-select");
 				var append_to_2 = $("#node-label-text")
 				if (category) {
 					if (!metadata_categories[category]) {
 						metadata_categories[category] = true;
 						append_to_1 = $("<optgroup>").attr("label", category);
+						append_to_1_map = $("<optgroup>").attr("label", category);
 						append_to_2 = $("<optgroup>").attr("label", category);
 						$("#metadata-select").append(append_to_1);
+						$("#metadata-map-select").append(append_to_1_map);
 						$("#node-label-text").append(append_to_2);
 					} else {
 						var to_find = "[label='" + category + "']";
 						append_to_1 = $("#metadata-select").find(to_find);
+						append_to_1_map = $("#metadata-map-select").find(to_find);
 						append_to_2 = $("#node-label-text").find(to_find);
 
 					}
 
 				}
 				append_to_1.append($("<option>").attr("value", value).text(label));
+				append_to_1_map.append($("<option>").attr("value", value).text(label));
 				append_to_2.append($("<option>").attr("value", value).text(label));
 				//$("#add-new-values-select").append($("<option>").attr("value",value).text(label));
 			}
@@ -740,7 +781,12 @@
 			tree.addDisplayChangedListener(function(type, data) {
 				if (type === 'category_changed') {
 					$("#metadata-select").val(data);
-					the_map.definePoints();
+					if (changeCounter == 0) {
+	          the_map.definePoints(8, "number");
+	        } else {
+	          the_map.updatePoints();
+	        }
+	        changeCounter++;
 				}
 
 			});
@@ -840,6 +886,10 @@
 				$("#slider-linkfontsize").slider("value", data['link_font_size']);
 				$("#spinner-linkfontsize").spinner("value", data['link_font_size']);
 			}
+			if (data['map_delta']) {
+				$("#slider-mapdelta").slider("value", data['map_delta']);
+				$("#spinner-mapdelta").spinner("value", data['map_delta']);
+			}
 			var sll = true;
 			if (data['show_link_labels'] === false) {
 				sll = false;
@@ -865,6 +915,7 @@
 				the_tree.legend_div[0].remove();
 				//resetGridColumns();
 				$("#metadata-select").find("option").remove();
+				$("#metadata-map-select").find("option").remove();
 				$("#node-label-text").find("option").remove();
 				$("#metadata-div").remove();
 				$("#context-menu").remove();
@@ -909,15 +960,19 @@
 			});
 			the_tree.resize();
 
-			if (the_tree.metadata_info) {
+			/*if (the_tree.metadata_info) {
 				addMetadataOptions(the_tree.metadata_info);
-			}
+			}*/
 			$("#metadata-select").val('nothing');
 			$("#node-label-text").val('ID');
 
 			if (data['initial_category']) {
 				$("#metadata-select").val(data['initial_category']);
-			}
+				$("#metadata-map-select").val(data['initial_category']);
+			}	else {
+				$("#metadata-select").val('nothing');
+      	$("#metadata-map-select").val('nothing');
+    	}
 			if (data['layout_data'] && data['layout_data']['nodes_links']) {
 				setControlPanel(data['layout_data']['nodes_links'])
 			} else {
@@ -965,6 +1020,7 @@
 			});
 
 			$('.panel-default').find('input, textarea, button, select, div, span').css("opacity", 1.0).prop('disabled', false);
+			$('#metadata-map-select').css("opacity", 0.5).prop('disabled', true);
 		}
 
 
@@ -978,6 +1034,7 @@
 			}).hide();
 			$("#graph-div").empty();
 			$("#metadata-select").empty();
+			$("#metadata-map-select").empty();
 			$("#add-new-values-select").empty();
 			metadata_options = {};
 			showWaitingDialog(msg);
@@ -1333,6 +1390,32 @@
 					value: 14,
 				});
 
+			$("input[name=handle-aggregation-type]:radio").click(function () {
+        if ($('input[name=handle-aggregation-type]:checked').val() == "metadata") {
+          $('#metadata-map-select').css("opacity", 1).prop('disabled', false);
+          $('#spinner-mapdelta').css("opacity", 0.5).prop('disabled', true);
+        } else if ($('input[name=handle-aggregation-type]:checked').val() == "coordinates") {
+        	$('#metadata-map-select').css("opacity", 0.5).prop('disabled', true).val("nothing");
+          $('#spinner-mapdelta').css("opacity", 1).prop('disabled', false);
+          $("#spinner-mapdelta").spinner('value', 8);
+        }
+    	});
+
+			$("#spinner-mapdelta").on("change", function(e) {
+				if (changeCounter != 0) {
+					var type = "number";
+    			the_map.definePoints($(this).val(), type);
+				}
+				})
+				.spinner({
+					min: 0,
+					max: 8,
+					value: 8,
+				});
+			$("#metadata-map-select").on("change", function(e) {
+		    var type = "metadata";
+		    the_map.definePoints($(this).val(), type);
+		  });
 
 			$("#slider-charge").on("change", function(e) {
 					the_tree.alterCharge($("#slider-charge").slider("value"));
@@ -1529,7 +1612,6 @@
 					this_panel.toggle("50");
 					this_panel.addClass("open-menu-panel");
 					icon.attr("class", "glyphicon glyphicon-menu-down");
-
 				}
 			});
 			try_backend();
@@ -1569,7 +1651,10 @@
 				graph_svg.setAttribute("width", graph_w);
 				graph_svg.getElementsByTagName("rect")[0].setAttribute("height", graph_h);
 				graph_svg.getElementsByTagName("rect")[0].setAttribute("width", graph_w);
+				var graph_svg_g = graph_svg.querySelector('#vis');
 				the_tree.resize();
+				// var graph_translation = "translate(-" + graph_w/2 + ",0) scale()" ;
+				// graph_svg_g.setAttribute("transform", "");
 				}, 400);
 				//console.log("h: "+ graph_h + " w: " + graph_w);
 		}
@@ -1603,6 +1688,7 @@
 	      the_tree.resize();
 	    }, 100);
 	  });
+
 	</script>
 </body>
 

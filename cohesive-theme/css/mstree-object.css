@@ -156,6 +156,7 @@ label {
   margin-right: 1.3rem;
   margin-top: 1.3rem;
   margin-left: 1.3rem;
+  
 }
 
 @media (min-width: 750px) {
@@ -185,6 +186,7 @@ label {
 }
 
 #legend-svg rect {
+  -webkit-transform: translateY(-0.1rem);
   transform: translateY(-0.1rem);
 }
 
@@ -395,6 +397,8 @@ label {
   background-color: transparent;
 }
 
+
+
 #sidebar {
   left: 0;
   bottom: auto;
@@ -479,6 +483,7 @@ label {
 
 #sidebar .panel-body#mst-node-menu-panel,
 #sidebar .panel-body#mst-link-menu-panel,
+#sidebar .panel-body#mst-map-menu-panel,
 #sidebar .panel-body#tree-menu-panel {
   padding: 0;
 }
@@ -603,6 +608,10 @@ input[type=checkbox] {
 .panel-body-section select:focus {
   border: 1px solid var(--main);
   outline: 0;
+}
+
+#metadata-map-select {
+  margin-top: 1.1rem;
 }
 
 #draggable-area {
@@ -964,7 +973,7 @@ input[type=checkbox] {
 
 .leaflet-container {
   font-weight: 400;
-  font-family: "Titillium", sans-serif;
+  font-family: "OpenSans", sans-serif;
 }
 
 .leaflet-tile-container img.leaflet-tile {

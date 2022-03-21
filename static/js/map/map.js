@@ -1,6 +1,6 @@
 var the_map = {};
 
-the_map.ctrl = 0;
+the_map.load_count = 0;
 
 /**
  * 
@@ -8,7 +8,6 @@ the_map.ctrl = 0;
  * [https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb](https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb)
  * 
  */
-
 the_map.hexToRgb = function (hex) {
   var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result ? {
@@ -20,10 +19,9 @@ the_map.hexToRgb = function (hex) {
 
 /**
  * 
- * Show/Hide sample list in a the point popup
+ * Show/Hide sample list in the point popup
  * 
  */
-
 the_map.toggleSampleListView = function (e) {
   var pu_contents = e.target.parentNode.parentNode;
   var samples_list_container = pu_contents.querySelector(".pu-samples-list-container");
@@ -36,14 +34,13 @@ the_map.toggleSampleListView = function (e) {
     e.target.innerHTML = 'Nascondi lista campioni';
     samples_list_container.classList.add('show');
   }
-}
+} // toggleSampleListView
 
 /**
  * 
- * Select/Deselect all samples in a point
+ * Select all samples in a point
  * 
  */
-
 the_map.samplesSelection = function (e) {
   var pu_contents = e.target.parentNode.parentNode;
   var pu_info = pu_contents.querySelector('ul.point-popup-info');
@@ -66,8 +63,13 @@ the_map.samplesSelection = function (e) {
   } else {
     pu_info_selected.innerHTML = 'Nessun campione selezionato  <span class="info-number"></span>';
   }
-}
+} // samplesSelection
 
+/**
+ * 
+ * Deselect all samples in a point
+ * 
+ */
 the_map.samplesDeselection = function (e) {
   var pu_contents = e.target.parentNode.parentNode;
   var pu_info = pu_contents.querySelector('ul.point-popup-info');
@@ -84,14 +86,13 @@ the_map.samplesDeselection = function (e) {
   the_tree.unselectNodesByIds(codes);
   // Here we update information about selcetd samples
   pu_info_selected.innerHTML = 'Nessun campione selezionato  <span class="info-number"></span>';
-}
+} // samplesDeselection
 
 /**
  * 
  * Sample selection
  * 
  */
-
 the_map.sampleSelection = function (id, code, ctrl) {
   var selector = "#"+id;
   var sample = document.querySelector(selector);
@@ -105,7 +106,7 @@ the_map.sampleSelection = function (id, code, ctrl) {
       the_tree.selectNodesByIds(code);
       /**
        * 
-       * We need to detect which of the other sample in the pop up is selected when we click on a sample link.
+       * We need to detect which of the other samples in the pop up is selected when we click on a sample link.
        * 
        * So we match if samples contained in the popup corresponds to the samples selected on the tree. If yes we assign a `p-selected` class witch control the aspect.
        * 
@@ -120,7 +121,7 @@ the_map.sampleSelection = function (id, code, ctrl) {
         }
       }
     } else {
-      // insert here a modal box with the alert message and a button to calculate all the anomalies
+      // insert here a modal box with the alert message
       alert("Ops! Sembra che il campione selezionato non abbia una corrispondenza su GrapeTree.");
     }
   } else {
@@ -128,7 +129,7 @@ the_map.sampleSelection = function (id, code, ctrl) {
     the_tree.unselectNodesByIds(code);
     /**
      * 
-     * We need to detect which of the other sample in the pop up is not selected when we click on a sample link to deselcet it.
+     * We need to detect which of the other samples in the pop up is not selected when we click on a sample link to deselcet it.
      * 
      * So we match if samples contained in the popup not corresponds to the samples selected on the tree. If yes we remove the `p-selected` class witch control the aspect.
      * 
@@ -144,13 +145,13 @@ the_map.sampleSelection = function (id, code, ctrl) {
     }
   }
   // Here we update information about selcetd samples
-      samples_selected_number = pu_contents.getElementsByClassName("p-selected").length;
-      if (samples_selected_number != 0) {
-        pu_info_selected.innerHTML = 'Campioni Selezionati <span class="info-number">' + samples_selected_number + '</span>';
-      } else {
-        pu_info_selected.innerHTML = 'Nessun campione selezionato  <span class="info-number"></span>';
-      }
-}
+  samples_selected_number = pu_contents.getElementsByClassName("p-selected").length;
+  if (samples_selected_number != 0) {
+    pu_info_selected.innerHTML = 'Campioni Selezionati <span class="info-number">' + samples_selected_number + '</span>';
+  } else {
+    pu_info_selected.innerHTML = 'Nessun campione selezionato  <span class="info-number"></span>';
+  }
+} // sampleSelection
 
 /**
  * 
@@ -164,20 +165,247 @@ the_map.initMap = () => {
   }
   this.map = L.map('map-div').setView([42.00, 13.00], 5);
   this.osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
+    maxZoom: 18,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(this.map);
-
 } // initMap
+
+/**
+ * 
+ * Calculate point radius
+ * 
+ * 
+ */
+the_map.calculatePointRadius = (samples_amount) => {
+  // get min and max interval from samples_amount
+  var min_samples = Math.min(...samples_amount);
+  var max_samples = Math.max(...samples_amount);
+  var min_radius = 13;
+  var max_radius = 34;
+  var samples_interval = max_samples - min_samples;
+  var radius_interval = max_radius - min_radius;
+  var point_radius;
+  this.pointLayer.eachLayer((layer) => {
+    var samples_number = layer.feature.properties.samples.length;
+    if (samples_number == min_samples) {
+      point_radius = min_radius;
+    }
+    if (samples_number == max_samples) {
+      point_radius = max_radius;
+    }
+    if ((samples_number < max_samples) && (samples_number > min_samples)){
+      point_radius = ((samples_number * radius_interval) / samples_interval) + min_radius;
+    }
+    var icon = layer.options.icon;
+    icon.options.iconSize = [point_radius*2, point_radius*2];
+    icon.options.iconAnchor = [point_radius, point_radius];
+    layer.setIcon(icon);
+  });
+} // calculatePointRadius
+
+/**
+ * 
+ * Add data to map from geoJSON file.
+ * 
+ */
+the_map.loadGeoJson = (samples_amount, delta, type) => {
+  /**
+   * 
+   * We need to rebuild the GeoJSON provided as an url parameter to merge samples codes with same coordinates, first of all this will avoid the marker overlap but also get the basis to make (and color) pie chart when multiple samples are present in the same point.
+   * 
+   * When rebuilding the GeoJSON we hold a point clustering system in order to allow users to aggregate point in two ways: with a simple numeric delta (this will reduce geographical nearest points) or with metadata (this will aggregate point by samples properties). We apply the given delta (numeric or string) on coordinates before rebuild a new object.
+   * 
+   */
+  this.urlParams = new URLSearchParams(window.location.search);
+  this.geoPath = this.urlParams.get('geo');
+  $.getJSON(this.geoPath, (data) => {
+    var r_obj = {
+      "features": [],
+      "name": data.name,
+      "type": data.type,
+      "id_dashboard": data.id_dashboard
+    };
+    var d_coordinates;
+    var d_data = [];
+    var d_code = [];
+    var ctrl = [];
+    var clusters = {};
+    
+    // check if delta is number (then it comes from aggregation select box) or string (then it comes from metedata select box), to be improved after test
+    if (type == "number") {
+      /**
+       * 
+       * First of all we build an object containing cooridnates cluster grouped by a key given with the "reduced" lat and lng. We create also a new parameter to data object `data.features[i].properties.kstr` with same value of the cluster[key], this will allow us to make a match between objects later in the code.
+       * 
+       */
+      for (var i = 0; i < data.features.length; i++) {
+        var key = "";
+        var base = 2; // changing the base value will change also the sensibility of the delta
+        var node = data.features[i].geometry.coordinates;
+        var lat = 0;
+        var lng = 0;
+
+        lat = parseInt(node[0] * Math.pow(base, delta)) / Math.pow(base, delta);
+        lng = parseInt(node[1] * Math.pow(base, delta)) / Math.pow(base, delta);
+        key = lat + "-" + lng;
+        data.features[i].properties.kstr = key;
+
+        if(clusters[key] == undefined) {
+          clusters[key]=[];
+        }
+        clusters[key].push(node);
+      }
+
+      /**
+       * 
+       * Then we loop clusters object to make the average of lat and lng grouped for each key, the results will be used to place the cluster in the map by giving it as coordinates to the `data.features[i].geometry.coordinates`.
+       * 
+       */
+      Object.keys(clusters).forEach(key => {
+        var initial_value = 0;
+        var lat_sum = clusters[key].reduce(
+          (previous_value, current_value) => {
+            return previous_value + current_value[0];
+          },
+          initial_value
+        );
+        var lng_sum = clusters[key].reduce(
+          (previous_value, current_value) => {
+            return previous_value + current_value[1];
+          },
+          initial_value
+        );
+        var lat_average = lat_sum / clusters[key].length;
+        var lng_average = lng_sum / clusters[key].length;
+
+        for (var i = 0; i < data.features.length; i++) {
+          if (data.features[i].properties.kstr == key) {
+            data.features[i].geometry.coordinates[0] = lat_average;
+            data.features[i].geometry.coordinates[1] = lng_average;
+          }
+        }
+      });
+    } else {
+      /**
+       * 
+       * If the delta is a metadata we will build an object containing cooridnates cluster grouped by a key given by the delta value string get from tree metadata. We create also a new parameter to data object `data.features[i].properties.kstr` with same value of the cluster[key], this will allow us to make a match between objects later in the code.
+       * 
+       */
+      var md = the_tree.getMetadata();
+      for (var i = 0; i < data.features.length; i++) {
+        var key = "";
+        var sample = data.features[i].properties.codice;
+        var node = data.features[i].geometry.coordinates;
+        if (md[sample]) {
+          if (md[sample][delta]) {
+            key = md[sample][delta];
+            data.features[i].properties.kstr = key;
+            if(clusters[key] == undefined) {
+              clusters[key]=[];
+            }
+            clusters[key].push(node);
+          }
+        }
+      }
+      /**
+       * 
+       * Then in the same way we did for delta number, we loop clusters object to make the average of lat and lng grouped for each key, the results will be used to place the cluster in the map by giving it as coordinates to the `data.features[i].geometry.coordinates`.
+       * 
+       * TO BE IMPROVED, CREATE AN UNIQUE FUNCTION TO REDUCE CLUSTERS
+       * 
+       */
+      Object.keys(clusters).forEach(key => {
+        var initial_value = 0;
+        var lat_sum = clusters[key].reduce(
+          (previous_value, current_value) => {
+            return previous_value + current_value[0];
+          },
+          initial_value
+        );
+        var lng_sum = clusters[key].reduce(
+          (previous_value, current_value) => {
+            return previous_value + current_value[1];
+          },
+          initial_value
+        );
+        var lat_average = lat_sum / clusters[key].length;
+        var lng_average = lng_sum / clusters[key].length;
+
+        for (var i = 0; i < data.features.length; i++) {
+          if (data.features[i].properties.kstr == key) {
+            data.features[i].geometry.coordinates[0] = lat_average;
+            data.features[i].geometry.coordinates[1] = lng_average;
+          }
+        }
+      });
+    }
+    
+
+    /**
+     * 
+     * Finally we build the new GeoJSON starting from `data` object to merge samples codes with same coordinates. 
+     * 
+    */
+    for (var i = 0; i < data.features.length; i++) {
+      /**
+       * 
+       * We retrieve all the coordinates, convert them in string and push in a controller array. If a coordinate do not exists in this array we build a new object and push it into new geoJSON (r_obj) if it already exists we do not build a new object to push but we will push directly data and codes in the existing object.
+       * 
+      */
+      var d_str = JSON.stringify(data.features[i].geometry.coordinates);
+      // d_str is used to build an array to control duplicates and to give an id to the object
+      // we will use the id later to retreive the existing object and push samples
+      if (!ctrl.includes(d_str)) {
+        ctrl.push(d_str);
+        var obj = {
+          "geometry": 
+          {
+            "coordinates": [],
+            "type": "Point",
+          },
+          "type": "Feature",
+          "properties": 
+          {
+            "samples": []
+          }
+        };
+        obj.geometry.coordinates = data.features[i].geometry.coordinates;
+        obj.kstr = key;
+        obj.id = d_str;
+        var sample = {
+          "data": data.features[i].properties.data,
+          "codice": data.features[i].properties.codice
+        };
+        obj.properties.samples.push(sample);
+        r_obj.features.push(obj);
+      } else {
+        // here we use id to get the existing object and push samples that share same coordinates
+        var foundIndex = r_obj.features.findIndex(x => x.id == d_str);
+        var sample = {
+          "data": data.features[i].properties.data,
+          "codice": data.features[i].properties.codice
+        };
+        r_obj.features[foundIndex].properties.samples.push(sample);
+      }
+    }
+    // this.pointLayer.addData(data);
+    this.pointLayer.addData(r_obj);
+    the_map.calculatePointRadius(samples_amount);
+    the_map.updateNodesInMap();
+    the_map.load_count++;
+    if (the_map.load_count == 1) {
+      // fitBounds force the map to zoom and allow the view of all the point, padding add a space around
+      this.map.fitBounds(this.pointLayer.getBounds(), { padding: [42, 42] });
+    }
+  });
+} // loadGeoJson
 
 /**
  * 
  * Define point layers
  * 
  */
-
-the_map.definePoints = () => {
-
+the_map.definePoints = (delta, type) => {
   /**
    * 
    * If point layer exists clear layers.
@@ -226,7 +454,10 @@ the_map.definePoints = () => {
         if (md[code]) {
           var key_color = md[code][cat];
           // get color code for the sample
-          var sample_color = colors[cat][key_color];
+          var sample_color;
+          if (colors[cat]) {
+            sample_color = colors[cat][key_color];
+          }
           if (sample_color) {
             // convert hex to rgb
             var sc_rgb = the_map.hexToRgb(sample_color).r + ", " + the_map.hexToRgb(sample_color).g + ", " + the_map.hexToRgb(sample_color).b;
@@ -290,7 +521,7 @@ the_map.definePoints = () => {
         var ul = pu_c.querySelector("ul");
         /**
          * 
-         * We need to detect which of the single sample are selected when pupup is binded, the bind action seems to build popup in that specific moment so we don't have menmory of the click event on the sample. Anyway this kind of control is needed also because the selection could happen in the tree :)
+         * We need to detect which of the single sample are selected when pupup is binded, the bind action seems to build popup in that specific moment so we don't have memory of the click event on the sample. Anyway this kind of control is needed also because the selection could happen in the tree :)
          * 
          * So we control if samples contained in the popup corresponds to the samples selected on the tree. If yes we assing a `p-selected` class witch control the aspect and also the `the_map.sampleSelection()`.
          * 
@@ -339,120 +570,138 @@ the_map.definePoints = () => {
       });
     }
   }).addTo(this.map);
-
-  /**
-   * 
-   * Add data to map from geoJSON file
-   * 
-   * 
-   */
-  this.urlParams = new URLSearchParams(window.location.search);
-  this.geoPath = this.urlParams.get('geo');
-  $.getJSON(this.geoPath, (data) => {
-    var r_obj = {
-      "features": [],
-      "name": data.name,
-      "type": data.type,
-      "id_dashboard": data.id_dashboard
-    };
-    var d_coordinates;
-    var d_data = [];
-    var d_code = [];
-    var ctrl = [];
-    /**
-     * 
-     * We have to rebuild the geoJson to merge samples codes with same coordinates, this will avoid the marker overlap and get the basis to make and color pie chart when multiple samples are present in the same point.
-     * 
-     * First of all we retrieve all the coordinates, convert them in string and push in a controller array. If a coordinate do not exists in this array we build a new object and push it into new geoJSON (r_obj) if it already exists we do not build a new object to push but we will push directly data and codes in the existing object.
-     * 
-     */
-
-    for (var i = 0; i < data.features.length; i++) {
-      var d_str = JSON.stringify(data.features[i].geometry.coordinates);
-      // d_str is used to build an array to control duplicates and to give an id to the object
-      // we will use the id later to retreive the existing object and push samples
-      if (!ctrl.includes(d_str)) {
-        ctrl.push(d_str);
-        var obj = {
-          "geometry": 
-          {
-            "coordinates": [],
-            "type": "Point",
-          },
-          "type": "Feature",
-          "properties": 
-          {
-            "samples": []
-          }
-        };
-        obj.geometry.coordinates = data.features[i].geometry.coordinates;
-        obj.id = d_str;
-        var sample = {
-          "data": data.features[i].properties.data,
-          "codice": data.features[i].properties.codice
-        };
-        obj.properties.samples.push(sample);
-        r_obj.features.push(obj);
-      } else {
-        // here we use id to get the existing object and push samples that share same coordinates
-        var foundIndex = r_obj.features.findIndex(x => x.id == d_str);
-        var sample = {
-          "data": data.features[i].properties.data,
-          "codice": data.features[i].properties.codice
-        };
-        r_obj.features[foundIndex].properties.samples.push(sample);
-      }
-    }
-
-    this.pointLayer.addData(r_obj);
-    // this.pointLayer.addData(data);
-    the_map.calculatePointRadius(samples_amount);
-    the_map.updateNodesInMap();
-    
-    // fitBounds force the map to zoom and allow the view of all the point, padding add a space around, but only for the first time (we use ctrl to control it)
-    console.log("-------------------------------");
-    console.log(the_map.ctrl);
-    if (the_map.ctrl === 1) {
-      this.map.fitBounds(this.pointLayer.getBounds(), { padding: [42, 42] });
-    }
-  });
-  the_map.ctrl++;
-}
-
+  
+  the_map.loadGeoJson(samples_amount, delta, type);
+} // definePoints
 
 /**
  * 
- * Calculate point radius
- * 
+ * Update point layers
  * 
  */
+the_map.updatePoints = () => {
 
-the_map.calculatePointRadius = (samples_amount) => {
-  // get min and max interval from samples_amount
-  var min_samples = Math.min(...samples_amount);
-  var max_samples = Math.max(...samples_amount);
-  var min_radius = 13;
-  var max_radius = 34;
-  var samples_interval = max_samples - min_samples;
-  var radius_interval = max_radius - min_radius;
-  var point_radius;
+  var md = the_tree.getMetadata();
+  var nodes = the_tree.getAllNodesIDs();
+  var selected_nodes = the_tree.getSelectedNodeIDs();
+  // simple array to store how many samples we have on each point
+  var samples_amount =[];
+  // get data from the tree: metadata and colors for categories
+  var colors = the_tree.objColors;
+  var cat = Object.keys(colors)[0];
+
   this.pointLayer.eachLayer((layer) => {
+    var feat_samples = layer.feature.properties.samples;
+    var popup_contents = "";
+    var samples_list = "";
+    var point_data = [];
     var samples_number = layer.feature.properties.samples.length;
-    if (samples_number == min_samples) {
-      point_radius = min_radius;
+    for (var i = 0; i < feat_samples.length; i++) {
+      // get the code
+      var code = feat_samples[i].codice;
+      // get the sample category to use it as a key to get color code
+      var fill_color;
+      var stroke_color;
+      if (md[code]) {
+        var key_color = md[code][cat];
+        // get color code for the sample
+        var sample_color = colors[cat][key_color];
+        if (sample_color) {
+          // convert hex to rgb
+          var sc_rgb = the_map.hexToRgb(sample_color).r + ", " + the_map.hexToRgb(sample_color).g + ", " + the_map.hexToRgb(sample_color).b;
+          fill_color = sc_rgb + ", 0.9";
+          stroke_color = sc_rgb + ", 0.9";
+        } else {
+          fill_color = "255, 255, 255, 0.9";
+          stroke_color = "255, 255, 255, 0.9";
+        }
+      } else {
+        fill_color = "255, 255, 255, 0";
+        stroke_color = "255, 255, 255, 0";
+      }
+      // create data object
+      var point_data_object = {
+        name: code,
+        value: 100,
+        style: {
+          fillStyle: "rgba(" + fill_color + ")",
+          strokeStyle: "rgba(" + stroke_color + ")"
+        }
+      };
+
+      point_data.push(point_data_object);
+      /**
+       * 
+       * Build popups contents
+       * 
+       */
+      var str_code = code.replaceAll(/[./]/g, '');
+      var code_link;
+      var ctrl;
+      if (nodes.includes(code)) {
+        ctrl = true;
+        code_link = "<a id='p-" + str_code + "' data-code='" + code + "' class='pu-sample-link' onclick='the_map.sampleSelection(this.id, \"" + code + "\", " + ctrl + ");'> <span style='background-color: rgba(" + fill_color + ");'></span> " + code + "</a>";
+      } else {
+        ctrl = false;
+        code_link = "<a id='p-" + str_code + "' class='pu-sample-link warning' onclick='the_map.sampleSelection(this.id, \"" + code + "\", " + ctrl + ");'> <span></span> " + code + "</a>";
+      }
+      if (samples_list == "") {
+        samples_list = code_link;
+      } else {
+        samples_list += ", " + code_link;
+      }
     }
-    if (samples_number == max_samples) {
-      point_radius = max_radius;
+    popup_contents = '<div class="point-popup-contents"> <ul class="point-popup-info"> <li>Totale campioni <span class="info-number">' + samples_number + '</span> </li> <li class="point-popup-info-selected"></li> </ul> <div class="point-popup-utilities"> <a onclick="the_map.samplesSelection(event);">Seleziona tutti</a> <a onclick="the_map.samplesDeselection(event);">Deseleziona tutti</a> </div> <div class="point-popup-utilities"> <a id="point-popup-toggle-sample-view" onclick="the_map.toggleSampleListView(event);">Mostra lista campioni</a> </div> <div class="pu-samples-list-container"> <div class="label label-select-tree">Seleziona un campione per vederlo in GrapeTree</div> ' + samples_list + ' </div> </div> </div>';
+    // assign percentage value based on samples numbers
+    var c_value = 100 / samples_number;
+    for (var i = 0; i < point_data.length; i++) {
+      point_data[i].value = c_value;
     }
-    if ((samples_number < max_samples) && (samples_number > min_samples)){
-      point_radius = ((samples_number * radius_interval) / samples_interval) + min_radius;
-    }
-    var icon = layer.options.icon;
-    icon.options.iconSize = [point_radius*2, point_radius*2];
-    icon.options.iconAnchor = [point_radius, point_radius];
-    layer.setIcon(icon);
+    samples_amount.push(samples_number);
+    layer.options.data = point_data;
+    layer.options.icon.options.data = point_data;
+    layer.setIcon(layer.options.icon);
+    layer.bindPopup(popup_contents).on('click', function(e) {
+      var pu_c = e.target._popup._container.querySelector('.point-popup-contents');
+      var pu_a_selected_number = 0;
+      var pu_a_warning_number = 0;
+      var s_nodes = the_tree.getAllSelectedNodesIDs();
+      var pu_a = pu_c.querySelectorAll('a.pu-sample-link');
+      var ul = pu_c.querySelector("ul");
+      /**
+       * 
+       * We need to detect which of the single sample are selected when pupup is binded, the bind action seems to build popup in that specific moment so we don't have menmory of the click event on the sample. Anyway this kind of control is needed also because the selection could happen in the tree :)
+       * 
+       * So we control if samples contained in the popup corresponds to the samples selected on the tree. If yes we assing a `p-selected` class witch control the aspect and also the `the_map.sampleSelection()`.
+       * 
+       * In the same for loop we count how many selected samples is in there and also mismatching sample marked with `warning` class in popup construction to give some information and utilities to the users.
+       * 
+       */
+      for (var i = 0; i < pu_a.length; i++) {
+        var pu_a_code = pu_a[i].getAttribute('data-code');
+        if (s_nodes.includes(pu_a_code)) {
+          pu_a[i].classList.add('p-selected');
+        }
+      }
+
+      /**
+       * 
+       * Here we add information about samples and utilities to work with them.
+       * 
+       */
+      pu_a_selected_number = pu_c.getElementsByClassName("p-selected").length;
+      if (pu_a_selected_number != 0) {
+        var selected_info = ul.querySelector(".point-popup-info-selected");
+        selected_info.innerHTML = 'Campioni Selezionati <span class="info-number">' + pu_a_selected_number + '</span>';
+      } else {
+        var selected_info = ul.querySelector(".point-popup-info-selected");
+        selected_info.innerHTML = 'Nessun campione selezionato  <span class="info-number"></span>';
+      }
+    });
   });
-}
+
+  the_map.updateNodesInMap();
+} // updatePoints
 
 /**
  * 
@@ -529,10 +778,11 @@ the_map.findNodesInMap = (selected_groups) => {
       layer._icon.classList.remove('partially-selected');
     });
   }
-}
+} // findNodesInMap
 
 /**
  * 
+ * Update style for nodes in map.
  * 
  */
 the_map.updateNodesInMap = () => {
@@ -554,7 +804,6 @@ the_map.updateNodesInMap = () => {
   });
 
   if (selected_ids.length > 0) {
-
       this.pointLayer.eachLayer((layer) => {
         var feat_samples = layer.feature.properties.samples;
         var feat_samples_codes = [];
@@ -587,4 +836,4 @@ the_map.updateNodesInMap = () => {
         layer._icon.classList.remove('partially-selected');
       });
     }
-}
+} // updateNodesInMap
