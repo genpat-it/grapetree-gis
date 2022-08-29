@@ -35,9 +35,7 @@ npm install live-server -g
 You can load data by url, in `tmp` folder you will find some differents data to load:
 
 ```
-?geo=/tmp/test_data/points.geojson&tree=/tmp/test_data/cgMLST.nwk&metadata=/tmp/test_data/cgMLST.tsv
 ?tree=/tmp/tree.nwk&metadata=/tmp/metadata.tsv&geo=/tmp/points.geojson
-?tree=/tmp/adp/abruzzo/tree.nwk&metadata=/tmp/adp/abruzzo/meta.tsv&geo=/tmp/adp/abruzzo/points.geojson
 ```
 
 Please make sure following files are in the right directory, according to the url.
