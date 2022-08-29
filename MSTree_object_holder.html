@@ -35,11 +35,11 @@
 	<script src="static/js/SlickGrid/slick.dataview.js"></script>
 
 	<script src="static/js/tree/context.js?version=1"></script>
-
 	<script src="static/js/tree/grid.js?version=1"></script>
-
 	<script src="static/js/tree/help.js?version=1"></script>
 
+	<script src="static/js/spectrum/spectrum.min.js"></script>
+	<link rel="stylesheet" href="static/js/spectrum/spectrum.css" type="text/css"/>
 
 	<!--information divs-->
 	<div id='welcome-div' style='background:white;padding:10px'>
@@ -81,6 +81,30 @@
 				</div>
 			</div><!-- /.modal-content -->
 		</div><!-- /.modal-dialog -->
+		<script charset="utf-8">
+	  	$("#modal-ok-button").click(function(e){
+			var profile_file =  $(this).data("profile_file")
+			if (profile_file){
+				processProfileFile(profile_file);
+				$(this).data("profile_file",null);
+				$("#modal-ok-button").html("Close");
+				$("#param-panel").hide();
+				e.stopImmediatePropagation();
+				$("#modal-title").hide();
+				showWaitingDialog("Processing Profiles");
+			}
+		});
+
+		$("#method-select").change(function(e) {
+			if ($(this).val() == "MSTree") $("#MST-option").show();
+			else $("#MST-option").hide();
+		});
+
+		$("#matrix-select").change(function(e) {
+			if ($(this).val() == "symmetric") $("#symmetric-option").show();
+			else $("#symmetric-option").hide();
+		});
+	  </script>
 	</div><!-- /.modal -->
 
 	<div id='sidebar'>
@@ -90,9 +114,9 @@
 				<span id='file-menu-icon' class='glyphicon glyphicon-menu-down'> </span>
 			</div>
 			<div class="panel-body" id='file-menu-panel'>
-				<div id='load-panel' style='display: none;'>
-					<button title='Handles trees, profiles and metadata files' id='button-files' class='show-tooltip'> Load Files</button>
-					<span class="glyphicon glyphicon-question-sign" style="float:right;margin-right:5px" onclick="getHelpBox('load_files');"></span>
+				<div id='load-panel'>
+					<button title='Handles trees, profiles and metadata files' id='button-files' class=''>Load GrapeTree</button>
+					<!--span class="glyphicon glyphicon-question-sign" style="float:right;margin-right:5px" onclick="getHelpBox('load_files');"></span-->
 					<hr>
 				</div>
 				<div id='save-panel'>
@@ -106,7 +130,7 @@
 					<button id="save-tree-json">Save GrapeTree</button>
 					<!-- span class="glyphicon glyphicon-question-sign" style="float:right;margin-right:5px" onclick="getHelpBox('save_grapetree');"></span-->
 					<!--br-->
-					<button id="save-tree-nwk">Save as Newick Tree</button>
+					<!--button id="save-tree-nwk">Save as Newick Tree</button-->
 					<!--br-->
 					<button id="mst-download-svg">Download SVG</button>
 					<!--br-->
@@ -129,7 +153,7 @@
 				<!--
 				–––––––––––––––––––––––––––––––––––––––––––––––––– -->
 				<div class="panel-body-section">
-					<button id='button-goback' onclick='loadMSTree(tree_raw);if(current_metadata_file) {loadMetadataText(current_metadata_file[0], current_metadata_file[1]);}'> Original tree</button>
+					<button id='button-goback'> Original tree</button>
 					<!--button id='button-goback' style='margin-left:15px;' onclick='loadMSTree(tree_raw);if(current_metadata_file) {loadMetadataText(current_metadata_file[0], current_metadata_file[1]);}'> Original tree</button-->
 					<!--span class="glyphicon glyphicon-question-sign" style="float:right;margin-right:15px" onclick="getHelpBox('tree_layout');"></span-->
 					<!--br-->
@@ -175,7 +199,7 @@
 					<!--br-->
 					<select id='metadata-select'>
 						<!--select style="width:160px" id='metadata-select'-->
-						<option value='nothing'>No category</option>
+						<!--option value='nothing'>No category</option-->
 					</select>
 				</div><!-- ./panel-body-section -->
 				<!--hr-->
@@ -345,11 +369,11 @@
 					<!--
 					–––––––––––––––––––––––––––––––––––––––––––––––––– -->
 					<!--span class="glyphicon glyphicon-question-sign" style="float:right;margin-right:5px" onclick="getHelpBox('branch_cutoffs');"></span-->
-					<!--label>For branches <br> longer than:<input type='text' id ='spinner-hide-link-length' class='spin-group'></label-->
+					<!--label>For branches <br> longer than:<input type='text' id ='spinner-link-length' class='spin-group'></label-->
 					<!-- cleaned -->
 					<div class="spinner-box">
 						<label>For branches longer than:</label>
-						<input type='text' id='spinner-hide-link-length' class='spin-group'>
+						<input type='text' id='spinner-link-length' class='spin-group'>
 					</div>
 					<div class="branches-options">
 						<!-- used in place of table -->
@@ -419,6 +443,28 @@
 			</div>
 		</div>
 
+		<!-- ADDED PANEL TO INTERACT WITH LEGEND -->
+		<div class='panel panel-default'>
+			<div class='panel-heading mst-menu-title' id='mst-legend-menu'>
+				<b>Legend</b>
+				<span id='mst-legend-menu-icon' class='glyphicon glyphicon-menu-right'> </span>
+			</div>
+			<div class="panel-body" id='mst-legend-menu-panel'>
+				<div class="panel-body-section">
+					<!--div class="help help-tooltip" onclick="getHelpBox('branch_labels');">
+						<img src="genpat-theme/img/iconic/help-circle.svg" alt="Suggerimento">
+					</div-->
+					<button id="legend-select-all">Select all items</button>
+					<button id="legend-invert-selection">Invert slection</button>
+  				<button id="legend-clean-selection">Clean selection</button>
+				</div>
+				<div class="panel-body-section">
+					<!-- <button  id="legend-highlight-selection">See selected items</a> -->
+  				<button  id="legend-reset">Reset</a>
+				</div>
+			</div>
+		</div>
+
 		<!-- ADDED PANEL TO INTERACT WITH MAP -->
 		<div class='panel panel-default'>
 			<div class='panel-heading mst-menu-title' id='mst-map-menu'>
@@ -428,16 +474,18 @@
 			<div class="panel-body" id='mst-map-menu-panel'>
 				<div class="panel-body-section">
 					<!--div class="help help-tooltip" onclick="getHelpBox('branch_labels');">
-						<img src="genpat-theme/img/iconic/help-circle.svg" alt="Suggerimento">
+						<img src="cohesive-theme/img/iconic/help-circle.svg" alt="Suggerimento">
 					</div-->
 					<div class="aggregation-options">
 						<label>
 							<input type="radio" id="handle-aggregate-by-coordinates" name="handle-aggregation-type" value="coordinates" checked="" style="opacity: 1;"> Aggregate by coordinates
 						</label>
 					</div>
-					<div class="spinner-box">
+					<select id='map-delta-select' style="opacity: 0.5;" disabled>
+				  </select>
+					<!--div class="spinner-box">
 						<input type='text' id='spinner-mapdelta' class='spin-group'>
-					</div>
+					</div-->
 				</div>
 				<div class="panel-body-section">
 					<div class="aggregation-options">
@@ -446,8 +494,19 @@
 						</label>
 					</div>
 					<select id='metadata-map-select' style="opacity: 0.5;" disabled>
-				    <option value='nothing'>No category</option>
+				    <!--option value='nothing'>No category</option-->
 				  </select>
+				</div>
+				<div class="panel-body-section">
+					<div class="spinner-box">
+						<label>Min marker radius</label>
+						<input type='text' id='map-point-min-radius' class='spin-group'>
+					</div>
+					<div class="spinner-box">
+						<label>Max marker radius</label>
+						<input type='text' id='map-point-max-radius' class='spin-group'>
+					</div>
+  				<button id="reset-map-point-delta-radius">Reset default</a>
 				</div>
 			</div>
 		</div>
@@ -485,10 +544,10 @@
 	<!-- CUSTOM
 	–––––––––––––––––––––––––––––––––––––––––––––––––– -->
 	<div class="graph-tools">
-		<div class="graph-tool graph-tool-settings" onclick="toggleAside()">Impostazioni</div>
+		<div class="graph-tool graph-tool-settings" onclick="toggleAside()">Edit</div>
 		<div class="graph-tool graph-tool-map" onclick="toggleMap()">Map</div>
-		<div class="graph-tool graph-tool-zoom-in" onclick="javascript:the_tree.setScale(1.1,true)">Zoom In</div>
-		<div class="graph-tool graph-tool-zoom-out" onclick="javascript:the_tree.setScale(0.9,true)">Zoom Out</div>
+		<!-- <div class="graph-tool graph-tool-zoom-in" onclick="javascript:the_tree.setScale(1.1,true)">Zoom In</div> -->
+		<!-- <div class="graph-tool graph-tool-zoom-out" onclick="javascript:the_tree.setScale(0.9,true)">Zoom Out</div> -->
 		<div class="graph-tool graph-tool-full-screen" onclick="openFullscreen()">Full Screen</div>
 		<div class="graph-tool graph-tool-close-full-screen" onclick="closeFullscreen()">Close Full Screen</div>
 	</div>
@@ -496,6 +555,7 @@
 	–––––––––––––––––––––––––––––––––––––––––––––––––– -->
 	<div id="graph-div" class="graph-overlay"></div>
 	<div id="map-div"></div>
+
 	<script src="static/js/main/bootstrap.min.js"></script>
 	<script charset="utf-8" src="static/js/main/d3.min.js"></script>
 	<script charset="utf-8" src="static/js/main/spin.min.js"></script>
@@ -504,6 +564,7 @@
 	<script charset="utf-8" src="static/js/tree/grapetree_fileHandler.js?version=1"></script>
 	<script src="static/js/tree/tree_extended.js"></script>
 	<script src="static/js/tree/tree_interceptor.js"></script>
+	<script src="static/js/tree/legend.js"></script>
 	<!-- LeafletJS JS -->
   <script src="static/js/map/leaflet.js"></script>
   <script src="static/js/map/leaflet-canvasicon.js"></script>
@@ -519,61 +580,16 @@
 {%endif %}
 -->
 	<script charset="utf-8">
-		getHelpBox('load_files')
-		MSFileChooser.prototype = Object.create(null);
-		MSFileChooser.prototype.constructor = MSFileChooser;
-
-		function MSFileChooser(filter) {
-			var self = this;
-			this.fileInput = $("<input>").attr("type", "file").hide();
-			this.callback = null;
-			this.fileInput.attr("accept", filter);
-			$('<body>').append(this.fileInput);
-			this.fileInput.change(function(event) {
-				self.callback(event.target.files);
-
-			});
-
-		}
-		MSFileChooser.prototype.setFilter = function(filter) {
-			this.fileInput.attr("accept", filter);
-		}
-		MSFileChooser.prototype.showOpenDialog = function(callback) {
-			this.callback = callback;
-			this.fileInput.trigger("click");
-		}
-
-		function displayErrorMessage(msg) {
-			Enterobase.modalAlert(msg);
-		}
-
-
-		function getHelpBox(help_item) {
-			if (help_item in help_text) {
-				document.getElementById("welcome-div-text").innerHTML = help_text[help_item];
-			} else {
-				document.getElementById("welcome-div-text").innerHTML = "<b>No Help text available for this feature</b>";
-			}
-			$('#welcome-div').toggle();
-
-		}
-
-		function getSuffix(name) {
-			var arr = name.split(".");
-			return arr[arr.length - 1];
-
-		}
-
-		var all_files = null;
-		var metatdata_file_name;
-		var waiting_spinner = null;
-		var waitingDialog = null;
-		var metadata_categories = {};
 		var context_menu = null;
 		var metadata_grid = null;
 		var the_tree = null;
 
-		var tree_name = "";
+		// getHelpBox('load_files')
+		var tree_raw = {};
+		var current_metadata_file = null;
+
+		var waiting_spinner = null;
+		var metadata_categories = {};
 
 		var cannot_connect = false;
 
@@ -585,7 +601,6 @@
 			log_link_scale: false,
 			show_individual_segments: false,
 			link_font_size: 14,
-			map_delta: 8,
 			show_link_labels: false,
 			show_node_labels: false,
 			node_font_size: 12,
@@ -593,6 +608,7 @@
 			node_collapsed_value: 0
 		};
 		var changeCounter = 0;
+		var filtered_nodes = [];
 
 		var tooltip_div = d3.select("body")
 			.append("div")
@@ -600,42 +616,43 @@
 			.style("opacity", 0)
 			.style("z-index", 9)
 
-		var legend_colour_chooser = $("<input>")
-			.on("change", function(e) {
-				var cc = $(this);
-				the_tree.setColour(cc.data("category"), cc.data("value"), cc.val());
-				the_tree.changeCategory(cc.data("category"));
-
-			})
-			.attr("type", "color").hide();
+		var legend_colour_chooser = $("<input>").spectrum({
+											  //type: "flat",
+											  togglePaletteOnly: "true",
+											  showInput: "true",
+											  showInitial: "true",
+											  allowEmpty: "false",
+											  showAlpha: "false",
+											  change: function(e) {
+												var cc  = $(this);
+												the_tree.setColour(cc.data("category"),cc.data("value"),cc.val());
+												the_tree.changeCategory(cc.data("category"));
+												var is_empty = Object.keys(the_legend.values).length === 0;
+												if(!is_empty) {
+													the_legend.legendRetrieveSelection();
+												}
+												if(the_legend.is_active) {
+													the_legend.legendHighlightSelection();
+												}
+											}})
+											.hide();
 
 		$("body").append(legend_colour_chooser);
 
+		$("#welcome-div").draggable().css({
+			position: 'relative',
+			border: '1px solid black',
+			margin: '10px',
+			'z-index': 9999
+		}).hide();
+
 		//a map of group to another map of name to label
 		var metadata_options = {};
-		var new_metadata_fields = [];
-
-		var locus_label = "";
-		var file_chooser = new MSFileChooser(".nwk");
-		var current_metadata_file = null;
-		var all_files = null;
-		var metadata_file_name = null;
-
-		function downloadMetadata() {
-			var lines = [];
-			lines.push("Barcode\tName");
-			for (var id in the_tree.metadata) {
-				var item = the_tree.metadata[id];
-				var barcode = Enterobase.encodeBarcode(id, db_code);
-				lines.push(barcode + "\t" + item["Name"]);
-			}
-			var text = lines.join("\n");
-			Enterobase.showSaveDialog(text, "tree.json");
-		}
+		// var file_chooser = new MSFileChooser(".nwk");
+		var file_chooser = new MSFileChooser(".json");
 
 		//update all the select options
 		function addMetadataOptions(options) {
-
 			var fields = Object.keys(options).sort(function(m, n) {
 				return m === 'nothing' ? -1 : n === 'nothing' ? 1 : ((m < n) ? -1 : 1)
 			});
@@ -652,7 +669,6 @@
 					label = obj;
 				}
 				var append_to_1 = $("#metadata-select");
-				var append_to_1_map = $("#metadata-map-select");
 				var append_to_2 = $("#node-label-text")
 				if (category) {
 					if (!metadata_categories[category]) {
@@ -661,37 +677,33 @@
 						append_to_1_map = $("<optgroup>").attr("label", category);
 						append_to_2 = $("<optgroup>").attr("label", category);
 						$("#metadata-select").append(append_to_1);
-						$("#metadata-map-select").append(append_to_1_map);
 						$("#node-label-text").append(append_to_2);
 					} else {
 						var to_find = "[label='" + category + "']";
 						append_to_1 = $("#metadata-select").find(to_find);
-						append_to_1_map = $("#metadata-map-select").find(to_find);
 						append_to_2 = $("#node-label-text").find(to_find);
 
 					}
 
 				}
 				append_to_1.append($("<option>").attr("value", value).text(label));
-				append_to_1_map.append($("<option>").attr("value", value).text(label));
 				append_to_2.append($("<option>").attr("value", value).text(label));
-				//$("#add-new-values-select").append($("<option>").attr("value",value).text(label));
+				
+				the_map.metadata_delta_options.push(value);
+				
 			}
 		}
-
-
-
 
 		function deleteMetadataCategory() {
 			var category = $("#add-new-values-select").val();
 			the_tree.removeCategory(category);
 			$("#metadata-select option[value='" + category + "']").remove();
+			$("#metadata-map-select option[value='" + category + "']").remove();
 			$("#node-label-text option[value='" + category + "']").remove();
 			$("#add-new-values-select option[value='" + category + "']").remove();
 			delete metadata_options[category];
 
 		}
-
 
 		function showToolTip(msg, e) {
 			if (!e) {
@@ -714,46 +726,6 @@
 		}
 
 
-		function addNewValues() {
-			var value = $("#add-new-values-input").val();
-			if (!value) {
-				return;
-			}
-			var ids = the_tree.getSelectedIDs();
-			var len = ids.length;
-			if (len === 0) {
-				return;
-
-			}
-			var field = $("#add-new-values-select").val();
-
-			var meta = {};
-			for (var i in ids) {
-				var id = ids[i];
-				var obj = {}
-				obj[field] = value;
-				meta[id] = obj;
-
-			}
-			the_tree.addMetadata(meta);
-			the_tree.changeCategory(field);
-			the_tree.clearSelection();
-
-		}
-
-
-		function addExtraField() {
-			var name = $("#add-extra-field-input").val();
-			if (!name) {
-				return;
-			}
-			addMetadataOptions(name, name);
-			$("#metadata-select").val(name);
-			$("#add-new-values-select").val(name);
-			the_tree.changeCategory(name);
-			metadata_grid.updateMetadataTable();
-		}
-
 		function treeLoaded(tree) {
 			//add the extra functionality
 			metadata_grid = new D3MSMetadataTable(tree);
@@ -770,6 +742,7 @@
 			tree.addTreeChangedListener(function(type, data) {
 				if (type === 'metadata_options_altered') {
 					addMetadataOptions(data);
+					the_map.setMapControlPanel();
 				} else if (type === 'nodes_collapased') {
 					$("#spinner-collapse-nodes").val(data);
 					$("#spinner-collapse-nodes").spinner('value', data);
@@ -781,31 +754,87 @@
 			tree.addDisplayChangedListener(function(type, data) {
 				if (type === 'category_changed') {
 					$("#metadata-select").val(data);
-					if (changeCounter == 0) {
-	          the_map.definePoints(8, "number");
-	        } else {
-	          the_map.updatePoints();
-	        }
-	        changeCounter++;
-				}
+					
+					// check if map delta selected is metadata
+					if (the_map.default_delta_type == "metadata") {
+						the_map.default_delta = data;
+					}
+					
+					// clean legend selction consequences
+					if (the_legend.is_active) {
+						var lines = document.querySelectorAll('#vis line');
+						for (var i = 0; i < lines.length; i++) {
+							lines[i].setAttribute('style', 'stroke: black; opacity: 1;');
+						}
+					}
+					
+					// assign the legend cat
+					the_legend.cat = data;
 
+					if (changeCounter < 1) {
+						the_map.definePoints();
+					} else {
+						the_map.defineMarkers();
+					}
+					changeCounter++;
+				}
+				/**
+				 * 
+				 * Add tools to legend
+				 *
+				 */
+				var svg_legend = document.querySelector('#legend-svg');
+				var svg_legend_parent = svg_legend.parentElement;
+				svg_legend_parent.setAttribute('id', 'legend-tools-container');
+				var legend_tools = document.querySelector('#legend-tools');
+				if (!legend_tools) {
+					legend_tools = document.createElement('div');
+					legend_tools.setAttribute('id', 'legend-tools');
+					legend_tools.innerHTML = '<div class="no-drag legend-tool legend-tool-settings" onclick="the_legend.toggleLegendSettings()"></div>\
+					<div class="no-drag legend-tool legend-tool-select-all" onclick="the_legend.legendSelectAll()"></div>\
+					<div class="no-drag legend-tool legend-tool-invert-selection" onclick="the_legend.legendInvertSelection()"></div>\
+					<div class="no-drag legend-tool legend-tool-clean-selection" onclick="the_legend.legendCleanSelection()"></div>\
+					<div class="no-drag legend-tool legend-tool-play-selection" onclick="the_legend.legendPlaySelection()"></div>\
+					<div class="no-drag legend-tool legend-tool-reset" onclick="the_legend.legendReset()"></div>';
+					svg_legend_parent.appendChild(legend_tools);
+				}
 			});
 
-			tree.legendItemClicked = function(data) {
-				legend_colour_chooser
-					.css({
-						"left": 0,
-						"top": 0
-					})
-					.val(data.colour)
-					.data({
-						"value": data.value.split("  [")[0],
-						"category": data.category
-					})
-					.trigger("click");
+			tree.legendItemClicked = function(data){
+				legend_colour_chooser.spectrum("set", data.colour);
+				//.css({"left":0,"top":0})
+				//.val(data.colour)
+				legend_colour_chooser.data({"value":data.value.split("  [")[0],"category":data.category});
+				//legend_colour_chooser.spectrum("show");
+				setTimeout(function(){legend_colour_chooser.spectrum("show");}, 50);
 			};
 
-			$("#spinner-hide-link-length").spinner({
+			/**
+	     * 
+	     * Select an item in the legend, function added in base tree (see CHANGE_LOG.md).
+	     * 
+	     */
+			tree.legendItemTextClicked = function(data) {
+				if(!$("#legend-tools").hasClass("active")) {
+					$("#legend-tools").addClass("active");
+				}
+				var target = $(data.target);
+				if (target.attr('class') == 'selected') {
+					target.attr('class', 'not-selected');
+					// delete values
+					delete the_legend.values[data.real];
+					// remove data.value from items array
+					the_legend.items = the_legend.items.filter(function(item) {return item !== data.value});
+				} else {
+					target.attr('class', 'selected');
+					the_legend.values[data.real] = data.colour;
+					the_legend.items.push(data.value);
+				}
+				the_legend.cat = data.category;
+				the_legend.legendHighlightSelection();
+			};
+
+			$("#spinner-link-length").spinner({
 				min: 0,
 				max: tree.max_link_distance,
 				step: Math.max(1e-6, (tree.max_link_distance / 1000.0).toPrecision(1)),
@@ -834,26 +863,8 @@
 			$("#waiting-image").attr("src", "static/js/img/ms_complete_1.png").show();
 			// legend_colour_chooser.hide();
 			$("#information-div").modal("hide");
+
 			the_map.initMap();
-		}
-
-		function treeLoading(tree, msg) {
-			if (msg === 'complete') {
-				treeLoaded(tree);
-			} else {
-
-				$("#waiting-information").text(msg)
-
-			}
-
-		}
-
-
-		function loadFailed(msg) {
-			$("#information-div").modal("show");
-			$(waiting_spinner.el).hide();
-			$("#waiting-image").attr("src", "static/js/img/ms_failed_1.png").show();
-			$("#waiting-information").text(msg);
 		}
 
 		function setControlPanel(data) {
@@ -864,10 +875,10 @@
 			$("#spinner-nodesize").val(data['base_node_size'] * 10);
 
 			if (data['max_link_length']) {
-				$("#spinner-hide-link-length").val(data['max_link_length']);
+				$("#spinner-link-length").val(data['max_link_length']);
 				$("#handle-long-branch-hide").prop("checked", true);
 			} else if (data['hide_link_length']) {
-				$("#spinner-hide-link-length").val(data['hide-link-length']);
+				$("#spinner-link-length").val(data['hide-link-length']);
 				$("#handle-long-branch-cap").prop("checked", true);
 			}
 
@@ -885,10 +896,6 @@
 			if (data['link_font_size']) {
 				$("#slider-linkfontsize").slider("value", data['link_font_size']);
 				$("#spinner-linkfontsize").spinner("value", data['link_font_size']);
-			}
-			if (data['map_delta']) {
-				$("#slider-mapdelta").slider("value", data['map_delta']);
-				$("#spinner-mapdelta").spinner("value", data['map_delta']);
 			}
 			var sll = true;
 			if (data['show_link_labels'] === false) {
@@ -908,14 +915,29 @@
 
 
 
+		function treeLoading(tree, msg) {
+			if (msg === 'complete') {
+				treeLoaded(tree);
+			} else {
+				$("#waiting-information").text(msg);
+			}
+		}
+
+		function loadFailed(msg) {
+			$("#information-div").modal("show");
+			$(waiting_spinner.el).hide();
+			$("#waiting-image").attr("src", "static/js/img/ms_failed_1.png").show();
+			$("#waiting-information").text(msg);
+		}
+
 		function loadMSTree(data) {
+			// $("#welcome-div").toggle();
 			metadata_options = {};
 			if (the_tree) {
 				the_tree.svg.remove();
 				the_tree.legend_div[0].remove();
 				//resetGridColumns();
 				$("#metadata-select").find("option").remove();
-				$("#metadata-map-select").find("option").remove();
 				$("#node-label-text").find("option").remove();
 				$("#metadata-div").remove();
 				$("#context-menu").remove();
@@ -933,17 +955,15 @@
 			tree_interceptor(the_tree, (groupedNods) => the_map.findNodesInMap(groupedNods));
 			
 			the_tree.addSegmentOverListener(function(d) {
-				if ($("#show-node-tooltip").prop("checked")) {
-					if (the_tree.display_category === 'nothing') {
-						var node_ids = the_tree.grouped_nodes[d.data.idx];
-						var value = $.map(node_ids, function(idx) {
-							return the_tree.metadata[idx].Name ? the_tree.metadata[idx].Name : the_tree.metadata[idx].ID
-						}).join('<br>');
-						showToolTip(value);
-					} else {
-						var display = d.data.type;
-						showToolTip(display + "(" + d.data.value + ")");
-					}
+				if ($("#show-node-tooltip").prop("checked")){
+						if (the_tree.display_category === 'nothing') {
+							var node_ids = the_tree.grouped_nodes[d.data.idx];
+							var value = $.map(node_ids, function(idx) {return the_tree.metadata[idx].Name ? the_tree.metadata[idx].Name : the_tree.metadata[idx].ID}).join('<br>');
+							showToolTip(value);
+						} else {
+							var display = d.data.type;
+							showToolTip(display+"("+d.data.value+")");
+						}
 				}
 			});
 			the_tree.addSegmentOutListener(function(d) {
@@ -960,19 +980,16 @@
 			});
 			the_tree.resize();
 
+			// commented to avoid a double call for metadata_info
 			/*if (the_tree.metadata_info) {
 				addMetadataOptions(the_tree.metadata_info);
 			}*/
 			$("#metadata-select").val('nothing');
 			$("#node-label-text").val('ID');
 
-			if (data['initial_category']) {
+			if (data['initial_category']){
 				$("#metadata-select").val(data['initial_category']);
-				$("#metadata-map-select").val(data['initial_category']);
-			}	else {
-				$("#metadata-select").val('nothing');
-      	$("#metadata-map-select").val('nothing');
-    	}
+			}
 			if (data['layout_data'] && data['layout_data']['nodes_links']) {
 				setControlPanel(data['layout_data']['nodes_links'])
 			} else {
@@ -982,6 +999,7 @@
 				loadMetadataText(current_metadata_file[0], current_metadata_file[1]);
 			} else {
 				//updateMetadataTable();
+				metadata_grid.updateMetadataTable();
 			}
 			$("#rotation-icon").draggable({
 				containment: "#sidebar",
@@ -1019,13 +1037,15 @@
 
 			});
 
-			$('.panel-default').find('input, textarea, button, select, div, span').css("opacity", 1.0).prop('disabled', false);
-			$('#metadata-map-select').css("opacity", 0.5).prop('disabled', true);
+			// css property to set if a tree were loaded
+			$('body').removeClass('no-file show-aside');
+			$('#save-tree-json').css("opacity", 1).prop("disabled", false);
+			$('#mst-download-svg').css("opacity", 1).prop("disabled", false);
 		}
 
 
 		function initiateLoading(msg) {
-			$("#welcome-div-close").show();
+			// $("#welcome-div-close").show();
 			$("#welcome-div").draggable().css({
 				position: 'relative',
 				border: '1px solid black',
@@ -1034,116 +1054,9 @@
 			}).hide();
 			$("#graph-div").empty();
 			$("#metadata-select").empty();
-			$("#metadata-map-select").empty();
 			$("#add-new-values-select").empty();
 			metadata_options = {};
 			showWaitingDialog(msg);
-		}
-
-		function showModalForParams() {
-			$("#information-div").modal("show");
-			$("#param-panel").show();
-		}
-
-		tree_raw = {};
-
-		function processProfileFile(profile) {
-			if ($("#check-memory").prop('checked')) {
-				profile2check(profile);
-			} else {
-				profile2tree(profile);
-			}
-		};
-
-		function profile2check(profile) {
-			try {
-				$.ajax({
-					method: "POST",
-					url: "/maketree",
-					data: {
-						profile: profile,
-						method: $("#method-select").val(),
-						checkEnv: 1,
-					},
-					startTime: new Date(),
-				}).done(function(result) {
-					$("#information-div").modal("hide");
-					var sys_info = JSON.parse(result);
-					var diag = $('<div id="send-to-tree" title="Estimated memory / time usage"></div>').appendTo($("body"));
-
-					diag.append("<p><label>Memory (MB): </label>" + Math.round(sys_info.memory / 1024 / 1024) + "</p>");
-					var deltaTime = new Date() - this.startTime;
-					diag.append("<p><label>Time (minutes): </label>" + Math.round((sys_info.time + deltaTime / 1000) / 6) / 10 + "</p>");
-					diag.append("<p>Numbers are raw estimates and may be different from your system. </p>");
-					if (!sys_info.affordable) {
-						diag.append(
-							"<p><label style='font-color:red'>WARNING: More memory are required than you current have. The tree may still be calculated because some system can automatically compress the memory. However the calculation will take more time and may crash! </label></p>"
-							);
-					}
-					diag.append("<p><label>Calculate the tree? </label></p>");
-
-					diag.dialog({
-						width: 400,
-						resizable: false,
-						height: "auto",
-						modal: true,
-						close: function(e) {
-							diag.dialog('destroy').remove();
-						},
-						buttons: {
-							Yes: function() {
-								profile2tree(profile);
-								$(this).dialog("close");
-							},
-							No: function() {
-								$(this).dialog("close");
-							}
-						}
-					});
-				}).fail(function(jqXHR, textStatus) {
-					if (jqXHR.status == 405 || jqXHR.status == 404) {
-						loadFailed("Cannot reach the backend. Please download a FREE standalone version from https://github.com/achtman-lab/GrapeTree/");
-					} else {
-						console.log(textStatus);
-						loadFailed("There server returned an error. Is the profile file in the right format?");
-					}
-				});
-			} catch (e) {
-				loadFailed("The server could not be contacted");
-			}
-			$("#waiting-information").text("Estimating memory / time usage...");
-		}
-
-		function profile2tree(profile) {
-			$("#information-div").modal("show");
-			try {
-				$.ajax({
-					method: "POST",
-					url: "/maketree",
-					data: {
-						profile: profile,
-						method: $("#method-select").val(),
-						checkEnv: 0,
-					}
-				}).done(function(result) {
-					tree_raw = {
-						"nwk": result,
-						"layout_algorithm": $("#layout-select").val()
-					};
-					$("#headertag").text($("#headertag").text() + ' (' + $("#method-select").val() + ')');
-					loadMSTree(tree_raw);
-				}).fail(function(jqXHR, textStatus) {
-					if (jqXHR.status == 405 || jqXHR.status == 404) {
-						loadFailed("Cannot reach the backend. Please download a FREE standalone version from https://github.com/achtman-lab/GrapeTree/");
-					} else {
-						console.log(textStatus);
-						loadFailed("There server returned an error. Is the profile file in the right format?");
-					}
-				});
-			} catch (e) {
-				loadFailed("The server could not be contacted");
-			}
-			$("#waiting-information").text("Computing Tree");
 		}
 
 		function showWaitingDialog(msg) {
@@ -1154,24 +1067,13 @@
 		}
 
 
-
-
-
-
-
-
 		window.onload = function() {
-			$(document).on('show-help', function(e, ui) {
-				getHelpBox(ui.id);
-			});
-			$("#mst-svg-x").on('click', function(e) {
-				context_menu._trigger_context("mst-svg", e);
-			});
-			$("#myGrid-x").on("click", function(e) {
-				context_menu._trigger_context("myGrid", e);
-			});
-			$("#legend-svg-x").on("click", function(e) {
-				context_menu._trigger_context("legend-svg", e);
+			
+			the_map.setMapControlPanel();
+
+			$(".open-context").on('click', function(e, ui) {
+				var id = e.target.id;
+				context_menu._trigger_context(id.substring(0, id.length-2), e);
 			});
 
 			$(".show-tooltip").on('mouseenter', function(e) {
@@ -1184,20 +1086,7 @@
 			});
 
 			//allow dragging and dropping files
-			$("#graph-div").on('dragover', function(e) {
-					e.preventDefault();
-					e.stopPropagation();
-				})
-				.on('dragenter', function(e) {
-					e.preventDefault();
-					e.stopPropagation();
-				})
-				.on("drop", function(e) {
-					e.originalEvent.stopPropagation();
-					e.originalEvent.preventDefault();
-					var files = e.originalEvent.dataTransfer.files;
-					filesDropped(files);
-				});
+			// dropFiles($("#graph-div"));
 
 			$(".render-method").on("change", function(e) {
 				if (this.value == 'static') {
@@ -1207,7 +1096,7 @@
 				}
 			});
 			$("#handle-long-branch-display, #handle-long-branch-hide, #handle-long-branch-cap").on("change", function(e) {
-				var max = $("#spinner-hide-link-length").val();
+				var max = $("#spinner-link-length").val();
 				if (!max) {
 					max = the_tree.max_link_distance + 1;
 				}
@@ -1222,8 +1111,8 @@
 					the_tree.setHideLinkLength(the_tree.max_link_distance + 1);
 				}
 			});
-			$("#spinner-hide-link-length").on('change', function(e, ui) {
-				var max = $("#spinner-hide-link-length").val();
+			$("#spinner-link-length").on('change', function(e, ui) {
+				var max = $("#spinner-link-length").val();
 				if (!max) {
 					max = the_tree.max_link_distance + 1;
 				}
@@ -1242,17 +1131,6 @@
 				}
 			});
 
-			$("#upload-metadata-icon").click(function(e) {
-				if (!metadata_options['Custom Fields']) {
-					Enterobase.modalAlert("Please add a custom field before uplaoding a file containing values for this field");
-					return;
-				}
-				var i = Enterobase.makeCustomFileInput("fileupload", function(file) {
-					uploadMetadata(file);
-				});
-				i.trigger("click");
-			});
-
 			$("#metadata-select").on("change", function(e) {
 				the_tree.changeCategory($(this).val());
 			});
@@ -1266,21 +1144,45 @@
 
 			$(".panel-body").hide();
 
-			$("#slider-linklength").on("change", function(e) {
-					var brlen = Math.exp($(this).slider("value") / 1000.0);
-					$("#spinner-linklength").spinner('value', brlen);
+			// all slider spinners
+			$(function sliderSpinners() {
+				$(".slider-class").slider({
+					slide: function(e) {
+						$(this).trigger('change');
+					},
+					change: function(e) {
+						if (e.originalEvent) {
+							$(this).trigger('change');
+						}
+					}
+				});
+				$(".spin-group").spinner({
+					spin: function(e, ui) {
+						$(this).spinner("value", ui.value);
+					},
+					change: function(e) {
+						$(this).trigger('change', e);
+					}
+				}).keypress(function(e){
+					if (e.which === 13) {
+						$(this).trigger('change', e);
+					}
+				});
+				$( "#slider-linklength" ).on("change", function(e) {
+							var brlen = Math.exp($(this).slider("value")/1000.0);
+							$("#spinner-linklength").spinner('value', brlen);
 				})
 				.slider({
-					orientation: "horizontal",
-					min: 1609,
-					max: 9903,
-					value: 4605,
+						orientation: "horizontal",
+						min: 1609,
+						max: 9903,
+						value: 4605,
 				});
-
-			$("#spinner-linklength").on("change", function(e) {
-					var brlen = parseInt($(this).val());
-					$("#slider-linklength").slider('value', Math.log(brlen) * 1000.0);
-					the_tree.setLinkLength(brlen * 5.0);
+				
+				$("#spinner-linklength").on("change", function (e){
+						var brlen = parseInt($(this).val());
+						$( "#slider-linklength" ).slider('value', Math.log(brlen)*1000.0);
+						the_tree.setLinkLength(brlen*5.0);
 				})
 				.spinner({
 					min: 5,
@@ -1288,82 +1190,60 @@
 					value: 100,
 					step: 1,
 				});
-			$(".slider-class").slider({
-				slide: function(e) {
-					$(this).trigger('change');
-				},
-				change: function(e) {
-					if (e.originalEvent) {
-						$(this).trigger('change');
-					}
-				}
-			});
-			$(".spin-group").spinner({
-				spin: function(e, ui) {
-					$(this).spinner("value", ui.value);
-				},
-				change: function(e) {
-					$(this).trigger('change', e);
-				}
-			}).keypress(function(e) {
-				if (e.which === 13) {
-					$(this).trigger('change', e);
-				}
-			});
 
-			$("#slider-nodesize").on("change", function(e) {
-					$("#spinner-nodesize").spinner("value", $(this).slider("value"));
+				$( "#slider-nodesize" ).on("change", function(e) {
+					$( "#spinner-nodesize" ).spinner("value", $(this).slider("value"));
 				})
 				.slider({
-					orientation: "horizontal",
-					min: 20,
-					max: 500,
-					value: 100,
+						orientation: "horizontal",
+						min:20,
+						max:500,
+						value: 100,
 				});
-			$("#spinner-nodesize").on('change', function() {
-					the_tree.setNodeSize(parseInt($(this).val()) / 10.);
-					$("#slider-nodesize").slider("value", parseInt($(this).val()));
-				})
+				$( "#spinner-nodesize" ).on('change', function(){
+								the_tree.setNodeSize(parseInt($(this).val())/10.);
+								$( "#slider-nodesize" ).slider("value", parseInt($(this).val()));
+							})
 				.spinner({
-					min: 20,
-					max: 500,
-					value: 100,
+						min:20,
+						max:500,
+						value: 100,
 				});
 
 
-			$("#slider-relative-nodesize").on("change", function(e) {
-					$("#spinner-relative-nodesize").spinner("value", $(this).slider("value"));
+				$( "#slider-relative-nodesize" ).on("change", function(e) {
+					$( "#spinner-relative-nodesize" ).spinner("value", $(this).slider("value"));
 				})
 				.slider({
-					orientation: "horizontal",
-					min: 30,
-					max: 150,
-					value: 100,
-					step: 1,
+						orientation: "horizontal",
+						min:30,
+						max:150,
+						value: 100,
+						step:1,
 				})
-			$("#spinner-relative-nodesize").on("change", function(e) {
-					the_tree.setRelativeNodeSize(parseInt($(this).val()) / 200.0);
-					$("#slider-relative-nodesize").slider("value", parseInt($(this).val()));
+				$( "#spinner-relative-nodesize" ).on("change", function(e){
+					the_tree.setRelativeNodeSize(parseInt($(this).val())/200.0);
+					$( "#slider-relative-nodesize" ).slider("value", parseInt($(this).val()));
 				})
 				.spinner({
-					min: 30,
-					max: 150,
-					value: 100,
-					step: 1,
+						min:30,
+						max:150,
+						value: 100,
+						step:1,
 				});
 
-			$("#slider-node-fontsize").on("change", function(e) {
+				$( "#slider-node-fontsize" ).on("change", function(e) {
 					$("#spinner-node-fontsize").spinner('value', $(this).slider("value"));
 				})
 				.slider({
-					orientation: "horizontal",
-					min: 6,
-					max: 30,
-					value: 12,
+						orientation: "horizontal",
+						min:6,
+						max: 30,
+						value: 12,
 				});
-			$("#spinner-node-fontsize").on("change", function(e) {
-					$("#slider-node-fontsize").slider('value', parseInt($(this).val()));
-					the_tree.setNodeFontSize(parseInt($(this).val()));
+				$("#spinner-node-fontsize").on("change", function(e) {
+						$( "#slider-node-fontsize" ).slider('value', parseInt($(this).val()));
+						the_tree.setNodeFontSize(parseInt($(this).val()));
 				})
 				.spinner({
 					min: 6,
@@ -1371,18 +1251,18 @@
 					value: 12,
 				});
 
-			$("#slider-linkfontsize").on("change", function(e) {
+				$( "#slider-linkfontsize" ).on("change", function(e) {
 					$("#spinner-linkfontsize").spinner('value', $("#slider-linkfontsize").slider("value"));
 				})
 				.slider({
-					orientation: "horizontal",
-					min: 6,
-					max: 30,
-					value: 14,
+						orientation: "horizontal",
+						min:6,
+						max: 30,
+						value: 14,
 				});
-			$("#spinner-linkfontsize").on("change", function(e) {
-					$("#slider-linkfontsize").slider('value', parseInt($(this).val()));
-					the_tree.setLinkFontSize(parseInt($(this).val()));
+				$("#spinner-linkfontsize").on("change", function(e) {
+						$( "#slider-linkfontsize" ).slider('value', parseInt($(this).val()));
+						the_tree.setLinkFontSize(parseInt($(this).val()));
 				})
 				.spinner({
 					min: 6,
@@ -1390,42 +1270,98 @@
 					value: 14,
 				});
 
-			$("input[name=handle-aggregation-type]:radio").click(function () {
-        if ($('input[name=handle-aggregation-type]:checked').val() == "metadata") {
-          $('#metadata-map-select').css("opacity", 1).prop('disabled', false);
-          $('#spinner-mapdelta').css("opacity", 0.5).prop('disabled', true);
-        } else if ($('input[name=handle-aggregation-type]:checked').val() == "coordinates") {
-        	$('#metadata-map-select').css("opacity", 0.5).prop('disabled', true).val("nothing");
-          $('#spinner-mapdelta').css("opacity", 1).prop('disabled', false);
-          $("#spinner-mapdelta").spinner('value', 8);
-        }
-    	});
 
-			$("#spinner-mapdelta").on("change", function(e) {
-				if (changeCounter != 0) {
-					var type = "number";
-    			the_map.definePoints($(this).val(), type);
-				}
-				})
-				.spinner({
-					min: 0,
-					max: 8,
-					value: 8,
-				});
-			$("#metadata-map-select").on("change", function(e) {
-		    var type = "metadata";
-		    the_map.definePoints($(this).val(), type);
-		  });
-
-			$("#slider-charge").on("change", function(e) {
+				$( "#slider-charge" ).on("change", function(e) {
 					the_tree.alterCharge($("#slider-charge").slider("value"));
 					$(this).prop("title", $(this).slider("value"));
 				})
 				.slider({
 					orientation: "horizontal",
-					min: 0,
+					min:0,
 					max: 30,
 				});
+
+				$( "#slider-collapse-nodes" ).on("change", function(e) {
+					var val = Math.exp($(this).slider('value')/1000);
+					$("#spinner-collapse-nodes").spinner('value', val);
+				 })
+				 .slider({
+					orientation: "horizontal",
+					min:0,
+					max: 100,
+					value: 0,
+				});
+
+				$( "#spinner-collapse-nodes" ).on("change", function(e, ui) {
+					var v = parseFloat($("#spinner-collapse-nodes").val());
+					if (v != $(this).data.v) {
+						$(this).data.v = v;
+						$("#slider-collapse-nodes").slider('value', Math.log(v)*1000);
+						the_tree.collapseNodes(v);
+					}
+				})
+				.spinner({
+					min:0,
+					value: 0
+				});
+			});
+			
+			// map input events
+			$("input[name=handle-aggregation-type]:radio").click(function () {
+        if ($('input[name=handle-aggregation-type]:checked').val() == "metadata") {
+          $('#metadata-map-select').css("opacity", 1).prop('disabled', false);
+          $('#map-delta-select').css("opacity", 0.5).prop('disabled', true);
+        } else if ($('input[name=handle-aggregation-type]:checked').val() == "coordinates") {
+        	$('#metadata-map-select').css("opacity", 0.5).prop('disabled', true).val("nothing");
+          $('#map-delta-select').css("opacity", 1).prop('disabled', false);
+					$('#map-delta-select option[value=' + the_map.max_delta +']').prop('selected', true);
+        }
+    	});
+			$("#map-delta-select").on("change", function(e) {
+				$(this).addClass('cluster-active');
+				$("#metadata-map-select").removeClass('cluster-active');
+		    // if (changeCounter != 0) {
+					the_map.default_delta_type = "geographical";
+					the_map.coordinates_delta = $(this).val();
+    			the_map.definePoints(the_map.coordinates_delta, the_map.default_delta_type, filtered_nodes);
+				// }
+		  });
+			$("#metadata-map-select").on("change", function(e) {
+				$(this).addClass('cluster-active');
+				$("#map-delta-select").removeClass('cluster-active');
+		    the_map.default_delta_type = "metadata";
+				the_map.metadata_delta = $(this).val();
+		    the_map.definePoints(the_map.metadata_delta, the_map.default_delta_type, filtered_nodes);
+		  });
+			$('#map-point-min-radius').on("change", function(e) {
+		    var min_radius = parseInt($('#map-point-min-radius').val());
+		    var max_radius = parseInt($('#map-point-max-radius').val());
+		    if (min_radius) {
+		      the_map.point_min_radius = min_radius;
+		    }
+		    if (max_radius) {
+		      the_map.point_max_radius = max_radius;
+		    }
+		    the_map.defineMarkers();
+		  });
+			$('#map-point-max-radius').on("change", function(e) {
+		    var min_radius = parseInt($('#map-point-min-radius').val());
+		    var max_radius = parseInt($('#map-point-max-radius').val());
+		    if (min_radius) {
+		      the_map.point_min_radius = min_radius;
+		    }
+		    if (max_radius) {
+		      the_map.point_max_radius = max_radius;
+		    }
+		    the_map.defineMarkers();
+		  });
+		  $('#reset-map-point-delta-radius').on("click", function(e) {
+		    the_map.point_min_radius = the_map.point_min_radius_default;
+		    the_map.point_max_radius = the_map.point_max_radius_default;
+		    $('#map-point-min-radius').val(the_map.point_min_radius_default.toString());
+		    $('#map-point-max-radius').val(the_map.point_max_radius_default.toString());
+		    the_map.defineMarkers();
+		  });
 
 			$("#node-label-text").change(function(e) {
 				var val = $(this).val();
@@ -1435,15 +1371,6 @@
 				the_tree.setNodeText(val);
 			});
 
-
-			$("#button-refresh").click(function() {
-				showWaitingDialog("Refreshing The Tree");
-				setTimeout(function() {
-					the_tree.refreshGraph();
-					$("#information-div").modal("hide");
-				}, 500)
-
-			});
 			$("#show-link-labels").click(function(e) {
 				the_tree.showLinkLabels($(this).is(":checked"))
 			});
@@ -1463,7 +1390,12 @@
 			});
 
 			$("#button-files").click(function(e) {
-				var diag = $('<div id="read-text" title="Paste or read files"></div>').appendTo($('body'))
+				file_chooser.setFilter(".json");
+				file_chooser.showOpenDialog(function(files) {
+					filesDropped(files);
+					// diag.dialog("close");
+				});
+				/* var diag = $('<div id="read-text" title="Paste or read files"></div>').appendTo($('body'))
 					.append("<p><label>Paste a tree, profile or metadata here: </label></p>")
 					.append("<textarea id='paste-text' rows='10' cols='100'>")
 					.append("<p><label>Or load the files directly: </label></p>")
@@ -1493,82 +1425,48 @@
 							$(this).dialog("close");
 						}
 					}
-				});
+				}); */
 			});
-
-
-			$("#slider-collapse-nodes").on("change", function(e) {
-					var val = Math.exp($(this).slider('value') / 1000);
-					$("#spinner-collapse-nodes").spinner('value', val);
-				})
-				.slider({
-					orientation: "horizontal",
-					min: 0,
-					max: 100,
-					value: 0,
-				});
-
-			$("#spinner-collapse-nodes").on("change", function(e, ui) {
-					var v = parseFloat($("#spinner-collapse-nodes").val());
-					if (v != $(this).data.v) {
-						$(this).data.v = v;
-						$("#slider-collapse-nodes").slider('value', Math.log(v) * 1000);
-						the_tree.collapseNodes(v);
-					}
-				})
-				.spinner({
-					min: 0,
-					value: 0
-				});
 
 			$("#save-tree-json").click(function(e) {
-				saveTextAsFile(JSON.stringify(the_tree.getTreeAsObject()), "ms_tree.json");
+				// get tree as an object
+				var obj = the_tree.getTreeAsObject();
+				// append to tree object map elements: geoJSON and options
+				if (the_map.geojson && the_map.geojson.length > 0) {
+					obj.geoJson = JSON.parse(the_map.geojson);
+					obj.map_obj = the_map;
+				}
+				var json = JSON.stringify(obj);
+				saveTextAsFile(json, "grapetree.json");
 			});
 
-			$("#save-tree-nwk").click(function(e) {
+			/* $("#save-tree-nwk").click(function(e) {
 				saveTextAsFile(the_tree.getTreeAsNewick(), "ms_tree.nwk");
-			});
+			}); */
 
 			$("#center-graph-button").click(function(e) {
 				the_tree.centerGraph();
+			});
 
+			$("#button-refresh").click(function() {
+				showWaitingDialog("Refreshing The Tree");
+				setTimeout(function() {
+					the_tree.refreshGraph();
+					$("#information-div").modal("hide");
+				}, 500)
 			});
 
 			$("#search-metadata-icon").click(function(e) {
 				var keyword = $("#search-metadata-input").val();
-				if (!keyword) {
-					return;
-				}
-				var ids = the_tree.searchMetadata(keyword, $("#node-label-text").val());
-				the_tree.highlightNodes(ids);
-			});
-
-			$("#modal-ok-button").click(function(e) {
-				var profile_file = $(this).data("profile_file")
-				if (profile_file) {
-					processProfileFile(profile_file);
-					$(this).data("profile_file", null);
-					$("#modal-ok-button").html("Close");
-					$("#param-panel").hide();
-					e.stopImmediatePropagation();
-					$("#modal-title").hide();
-					showWaitingDialog("Processing Profiles");
+				if (keyword){
+					var ids = the_tree.searchMetadata(keyword, $("#node-label-text").val());
+					the_tree.highlightNodes(ids);
 				}
 			});
-
-			$("#method-select").change(function(e) {
-				if ($(this).val() == "MSTree") $("#MST-option").show();
-				else $("#MST-option").hide();
-			})
-
-			$("#matrix-select").change(function(e) {
-				if ($(this).val() == "symmetric") $("#symmetric-option").show();
-				else $("#symmetric-option").hide();
-			})
 
 			$("#graph-div").on('dblclick', function(e) {
 				if (the_tree) the_tree.clearSelection();
-			})
+			});
 
 			var target = document.getElementById('modal-header');
 			waiting_spinner = new Spinner({
@@ -1577,12 +1475,14 @@
 				top: "13%"
 			}).spin(target);
 
-
-			$('.panel-default').find('input, textarea, button, select, span, div').css("opacity", 0.3).prop('disabled', true);
+			// css property to set if there are no file to retreive in the url
+			$('body').addClass('no-file show-aside');
 			if (!tree_id) {
 				$("#file-menu-panel").css("opacity", 1.0).addClass("open-menu-panel").show();
 				$("#button-files").parent().css('opacity', 1.0);
 				$("#button-files").css("opacity", 1.0).prop("disabled", false).trigger('mouseenter');
+				$('#save-tree-json').css("opacity", 0.5).prop("disabled", true);
+				$('#mst-download-svg').css("opacity", 0.5).prop("disabled", true);
 			}
 
 			window.addEventListener("beforeunload", function(e) {
@@ -1596,7 +1496,12 @@
 				setupEnterobasePanel();
 				initiateLoading("Waiting");
 				getRemoteData();
+			} else {
+				$("#file-menu-panel").css("opacity", 1.0).addClass("open-menu-panel").show();
+				$("#button-files").parent().css('opacity', 1.0);
+				$("#button-files").css("opacity", 1.0).prop("disabled", false).trigger('mouseenter');
 			}
+
 			$(".mst-menu-title").click(function(e) {
 				if ($(this).prop("disabled") === true) {
 					return;
@@ -1614,11 +1519,22 @@
 					icon.attr("class", "glyphicon glyphicon-menu-down");
 				}
 			});
-			try_backend();
+			// try_backend();
 			loadNetFiles();
 		};
 
-		function try_backend() {
+		$("#button-goback").click(function(e) {
+			// loadMSTree(tree_raw);
+			location.reload();
+		});
+
+		$("#legend-highlight-selection").on("click", the_legend.legendHighlightSelection);
+		$("#legend-reset").on("click", the_legend.legendReset);
+		$("#legend-select-all").on("click", the_legend.legendSelectAll);
+	  $("#legend-clean-selection").on("click", the_legend.legendCleanSelection);
+		$("#legend-invert-selection").on("click", the_legend.legendInvertSelection);
+
+		/*function try_backend() {
 			try {
 				$.ajax({
 						method: "POST",
@@ -1632,42 +1548,47 @@
 			} catch (e) {
 				cannot_connect = true;
 			}
-		};
+		};*/
 
 		const bodyEl = document.body;
 
 		function toggleAside() {
-			bodyEl.classList.toggle("show-aside");
+			if (!bodyEl.classList.contains('no-file')) {
+				bodyEl.classList.toggle("show-aside");
+			}
 		}
 
 		function toggleMap() {
-			bodyEl.classList.toggle("show-map");
-			setTimeout(function(){
-				var graph = bodyEl.querySelector("#graph-div");
-				var graph_w = graph.offsetWidth;
-				var graph_h = graph.offsetHeight;
-				var graph_svg = graph.querySelector("#mst-svg");
-				graph_svg.setAttribute("height", graph_h);
-				graph_svg.setAttribute("width", graph_w);
-				graph_svg.getElementsByTagName("rect")[0].setAttribute("height", graph_h);
-				graph_svg.getElementsByTagName("rect")[0].setAttribute("width", graph_w);
-				var graph_svg_g = graph_svg.querySelector('#vis');
-				the_tree.resize();
-				// var graph_translation = "translate(-" + graph_w/2 + ",0) scale()" ;
-				// graph_svg_g.setAttribute("transform", "");
+			if (!bodyEl.classList.contains('no-file')) {
+				bodyEl.classList.toggle("show-map");
+				setTimeout(function(){
+					var graph = bodyEl.querySelector("#graph-div");
+					var graph_w = graph.offsetWidth;
+					var graph_h = graph.offsetHeight;
+					var graph_svg = graph.querySelector("#mst-svg");
+					graph_svg.setAttribute("height", graph_h);
+					graph_svg.setAttribute("width", graph_w);
+					graph_svg.getElementsByTagName("rect")[0].setAttribute("height", graph_h);
+					graph_svg.getElementsByTagName("rect")[0].setAttribute("width", graph_w);
+					var graph_svg_g = graph_svg.querySelector('#vis');
+					the_tree.resize();
+					// var graph_translation = "translate(-" + graph_w/2 + ",0) scale()" ;
+					// graph_svg_g.setAttribute("transform", "");
 				}, 400);
-				//console.log("h: "+ graph_h + " w: " + graph_w);
+			}
 		}
 
 		/* View fullscreen */
 		function openFullscreen() {
-			bodyEl.classList.toggle("show-fullscreen");
-			if (bodyEl.requestFullscreen) {
-				bodyEl.requestFullscreen();
-			} else if (bodyEl.webkitRequestFullscreen) { /* Safari */
-				bodyEl.webkitRequestFullscreen();
-			} else if (bodyEl.msRequestFullscreen) { /* IE11 */
-				bodyEl.msRequestFullscreen();
+			if (!bodyEl.classList.contains('no-file')) {
+				bodyEl.classList.toggle("show-fullscreen");
+				if (bodyEl.requestFullscreen) {
+					bodyEl.requestFullscreen();
+				} else if (bodyEl.webkitRequestFullscreen) { /* Safari */
+					bodyEl.webkitRequestFullscreen();
+				} else if (bodyEl.msRequestFullscreen) { /* IE11 */
+					bodyEl.msRequestFullscreen();
+				}
 			}
 		}
 
@@ -1685,7 +1606,9 @@
 
 		$(window).resize(function() {
 	    setTimeout(function() {
-	      the_tree.resize();
+	      if(the_tree) {
+					the_tree.resize();
+				}
 	    }, 100);
 	  });
 

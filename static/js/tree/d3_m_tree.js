@@ -866,12 +866,12 @@ D3MSTree.prototype._drawLinks=function(){
         this.link_elements.selectAll("line")
         .style('stroke', 'black')
         .style('opacity', function(it){
-			return (it.value >= self.hide_link_length) ? '0.0' : '1.0';
+			return (it.value > self.hide_link_length) ? '0.0' : '1.0';
         })
         .attr('stroke-dasharray', function(it){
             return (self.max_link_length && it.value > self.max_link_length) ? "3,5" : "";
         })
-        .attr("stroke-width","3px");
+        .attr("stroke-width","1px");
         
         this.link_elements.selectAll(".distance-label").attr("font-size",this.link_font_size);
 }
@@ -2388,8 +2388,21 @@ D3MSTree.prototype.getAllNodesIDs = function() {
 D3MSTree.prototype.getAllSelectedNodesIDs = function() {
   var g_nodes_ids = [];
   var nodes_ids = this.getSelectedNodeIDs();
-  console.log("---------------");
   console.log(nodes_ids);
+  for (var i = 0; i < nodes_ids.length; i++) {
+    g_nodes_ids.push(this._getIDsForNode(nodes_ids[i]));
+    g_nodes_ids = g_nodes_ids.flat(1);
+  }
+  return g_nodes_ids;
+}
+
+/**
+ * Returns all the ids of a given nodes list
+ * @returns {list}An array of node ids
+ */
+D3MSTree.prototype.getAllFilteredNodesIDs = function(nodes) {
+  var g_nodes_ids = [];
+  var nodes_ids = nodes;
   for (var i = 0; i < nodes_ids.length; i++) {
     g_nodes_ids.push(this._getIDsForNode(nodes_ids[i]));
     g_nodes_ids = g_nodes_ids.flat(1);

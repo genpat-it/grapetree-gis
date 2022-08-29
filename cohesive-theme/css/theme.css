@@ -343,7 +343,12 @@ label {
 /* HEADER */
 
 header {
-  padding: 1.3rem;
+  /*
+  padding: 0.8rem 1.3rem;
+  background-color: var(--dark);
+  */
+  /* consistency with cmdbuild header */
+  padding: 0.75rem 1.5rem;
   background-color: var(--main);
 }
 
@@ -382,32 +387,27 @@ header .platform-heading {
 }
 
 header .platoform-logo {
-  width: 7.6rem;
-  margin-top: -0.5rem;
-  margin-right: 0.3rem;
+  /* 
+  width: 2.4rem; 
+  margin-right: 0.8rem;
+  */
+  /* consistency with cmdbuild header */
+  margin-right: 1.3rem;
   line-height: 0;
-  opacity: 0.9;
+}
+
+header .platoform-logo img {
+  height: 3.3rem;
+  width: auto;
 }
 
 header h1 {
   color: var(--white);
-  font-size: 1.6rem;
-  font-weight: 400;
+  font-size: 1.5rem;
+  font-weight: 300;
   letter-spacing: .05rem;
   margin-bottom: 0;
   line-height: 1.2;
-}
-
-@media (min-width: 550px) {
-  header h1 {
-    font-size: 1.8rem;
-  }
-}
-
-@media (min-width: 750px) {
-  header h1 {
-    font-size: 2.1rem;
-  }
 }
 
 header h2 {
@@ -460,14 +460,13 @@ header h2 {
 @media (min-width: 1000px) {
   .tool-label {
     margin-right: 0.8rem;
-    font-size: 1.5rem;
   }
 }
 
 .tool-trigger {
   cursor: pointer;
-  width: 4.2rem;
-  height: 4.2rem;
+  width: 2.9rem;
+  height: 2.9rem;
   border-radius: 50%;
   background-color: rgba(255,255,255,0.2);
   position: relative;
@@ -483,14 +482,18 @@ header h2 {
 
 .tool-trigger img {
   position: absolute;
-  width: 2.1rem;
+  width: 1.8rem;
   height: auto;
   top: 50%;
   left: 50%;
-  margin-left: -1.05rem;
-  margin-top: -1.05rem;
+  margin-left: -0.9rem;
+  margin-top: -0.9rem;
   -webkit-transition: all 0.3s ease 0.3s;
   transition: all 0.3s ease 0.3s;
+}
+
+.tool-trigger img.hidden {
+  display: none;
 }
 
 /* MAIN */
@@ -510,7 +513,7 @@ header h2 {
 .main iframe {
   width: 100%;
   margin: 0 auto;
-  height: calc(100vh - 68px);
+  height: calc(100vh - 48px);
   border: 0;
   opacity: 0;
   -webkit-transition: all 0.3s ease;
@@ -531,6 +534,20 @@ footer {
   padding-top: 13vh;
   padding-bottom: 8vh;
   background-color: var(--main);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  -webkit-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+  -webkit-transform: translateY(100%);
+  transform: translateY(100%);
+}
+
+footer.show {
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
 }
 
 @media (min-width: 750px) {
@@ -549,6 +566,12 @@ footer {
   footer .eight.columns {
     width: 64%;
   }
+}
+
+footer .toolbar {
+  position: absolute;
+  top: 1.3rem;
+  right: 1.3rem;
 }
 
 footer .logo img {
@@ -606,15 +629,8 @@ footer .info {
 }
 
 footer .info img {
-  max-width: 16.5rem;
+  max-width: 12.3rem;
   opacity: 0.9;
-}
-
-@media (min-width: 750px) {
-  footer .info img {
-    -webkit-transform: translateX(-1.3rem);
-    transform: translateX(-1.3rem);
-  }
 }
 
 footer .info p {

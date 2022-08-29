@@ -27,7 +27,7 @@ function D3MSTreeContextMenu(tree,meta_grid,hide_tree_functions){
 	this.meta_grid=meta_grid;
 	var self = this;
 	$("#context-menu").remove();
-	var context_html = "<div id='context-menu' style='display:none;position:fixed;width:150px;z-index:4;background-color:#ffffff;border:1px solid #f2f2f2'> \
+	var context_html = "<div id='context-menu' style='display:none;position:fixed;width:150px;z-index:99;background-color:#ffffff;border:1px solid #f2f2f2'> \
 		<div id='mst-svg-menu' style='display:none' class='sub-context'> \
 			<span id='tree-functions-context'><div class='context-option selectAll'>Select all</div> \
 			<div class='context-option clearSelection'>Unselect all</div> \
@@ -49,8 +49,10 @@ function D3MSTreeContextMenu(tree,meta_grid,hide_tree_functions){
 		<div id='legend-svg-menu' style='display:none' class='sub-context'> \
 			<div class='context-option toggle-legend'>Hide figure legend</div> \
 			<hr class='context-hr'> \
-			<div class='context-option select-group'>Select related nodes</div> \
+			<div class='context-option quick-gradient'>Quick gradient order</div> \
 			<hr class='context-hr'> \
+			<div class='context-option select-group'>Select related nodes</div> \
+			<hr class='context-hr select-group-hr'> \
 			<b style='font-size:85%'><center>Colour By:&nbsp; \
 			<select style='margin:10px' class='context-select' id='color-colname'></select></center></b> \
 			<div style='font-size:90%'>Maximum group numbers</div> \
@@ -86,8 +88,8 @@ function D3MSTreeContextMenu(tree,meta_grid,hide_tree_functions){
 	var metadata_table_html = "<div id='myGrid-menu' style='display:none' class='sub-context'> \
 			<div class='context-option replaceSelection'>Replace selected with ...</div> \
 			<hr class='context-hr replaceSelection'> \
-			<div class='context-option selectAll'>Select all</div> \
-			<div class='context-option clearSelection'>Unselect all</div> \
+			<div class='context-option selectAll2'>Select all in table</div> \
+			<div class='context-option clearSelection2'>Unselect all in table</div> \
 			<hr class='context-hr'> \
 			<div class='context-option' id='go-left'>Go to left</div> \
 			<div class='context-option' id='go-right'>Go to right</div> \
@@ -214,44 +216,46 @@ D3MSTreeContextMenu.prototype._init=function(){
 		}
 	});
 
-	$(".colorscheme").change(function(e, ui) {
-		var value = $(this).val();
-		if (value === 'custom') {
-			var ccs_div = $('<div title="Customize a color scheme" style="width:20em; height:22em" id="custom_color_scheme"></div>').appendTo($('body'));
-			ccs_div.append('<div style="margin-bottom:5px">Paste color codes into the text box. <br>One color per line. <br> The colors can be in their names, <br>HEX codes or other HTML compatible codes.<br> Find the details in <a href="https://www.w3schools.com/html/html_colors.asp" target="_blank">THIS LINK</a></div>')
-			ccs_div.data('data', self.tree.color_schemes);
+	$(".colorscheme").click(function(e, ui) {
+		if (e.pageY == 0 && e.pageX == 0) {
+			var value = $(this).val();
+			if (value === 'custom') {
+				var ccs_div = $('<div title="Customize a color scheme" style="width:20em; height:22em" id="custom_color_scheme"></div>').appendTo($('body'));
+				ccs_div.append('<div style="margin-bottom:5px">Paste color codes into the text box. <br>One color per line. <br> The colors can be in their names, <br>HEX codes or other HTML compatible codes.<br> Find the details in <a href="https://www.w3schools.com/html/html_colors.asp" target="_blank">THIS LINK</a></div>')
+				ccs_div.data('data', self.tree.color_schemes);
 
-			var colors = self.tree.color_schemes.custom;
-			var legend_text = $('<div style="width:12em;height:20em;resize:none;overflow:auto;white-space:nowrap;float: left;" readonly id="legend_text" ></div>').appendTo(ccs_div)
-									.html(d3.selectAll('.legend-item').data().map(function(d) { return '<div style="float:left; width:0.9em; height:0.9em; margin-right:0.1em; background:'+d.group_colour+'"></div>' + d.group}).join('<br>'));
-			var ccs_text = $('<textarea style="width:8em;height:20em;resize:none;overflow:auto;white-space:nowrap;float: left;" id="ccs_text" ></textarea>').appendTo(ccs_div);
-			legend_text.on('scroll', function () {
-				ccs_text.scrollTop($(this).scrollTop());
-			});
-			ccs_text.on('change keyup paste', function(e) {
-				var colors = $(this).val().split('\n');
-				legend_text.html(d3.selectAll('.legend-item').data().map(function(d, i) {  return '<div style="float:left; width:0.9em; height:0.9em; margin-right:0.1em; background:'+colors[i]+'"></div>' + d.group}).join('<br>'));
-			}).on('scroll', function () {
-				legend_text.scrollTop($(this).scrollTop());
-			});
-			ccs_text.val(colors.join('\n'));
-			ccs_div.dialog({
-				width : 'auto',
-				height : 'auto', 
-				buttons: {
-					Confirm: function(){
-						$(this).data('data').custom = ccs_text.val().split('\n');
-						self.tree.changeCategory(self.tree.display_category);
-						$(this).dialog("close");
+				var colors = self.tree.color_schemes.custom;
+				var legend_text = $('<div style="width:12em;height:20em;resize:none;overflow:auto;white-space:nowrap;float: left;" readonly id="legend_text" ></div>').appendTo(ccs_div)
+										.html(d3.selectAll('.legend-item').data().map(function(d) { return '<div style="float:left; width:0.9em; height:0.9em; margin-right:0.1em; background:'+d.group_colour+'"></div>' + d.group}).join('<br>'));
+				var ccs_text = $('<textarea style="width:8em;height:20em;resize:none;overflow:auto;white-space:nowrap;float: left;" id="ccs_text" ></textarea>').appendTo(ccs_div);
+				legend_text.on('scroll', function () {
+					ccs_text.scrollTop($(this).scrollTop());
+				});
+				ccs_text.on('change keyup paste', function(e) {
+					var colors = $(this).val().split('\n');
+					legend_text.html(d3.selectAll('.legend-item').data().map(function(d, i) {  return '<div style="float:left; width:0.9em; height:0.9em; margin-right:0.1em; background:'+colors[i]+'"></div>' + d.group}).join('<br>'));
+				}).on('scroll', function () {
+					legend_text.scrollTop($(this).scrollTop());
+				});
+				ccs_text.val(colors.join('\n'));
+				ccs_div.dialog({
+					width : 'auto',
+					height : 'auto', 
+					buttons: {
+						Confirm: function(){
+							$(this).data('data').custom = ccs_text.val().split('\n');
+							self.tree.changeCategory(self.tree.display_category);
+							$(this).dialog("close");
+						},
+						Cancel: function() {
+							$(this).dialog("close");
+						}
 					},
-					Cancel: function() {
-						$(this).dialog("close");
+					close: function (e) {
+						ccs_div.dialog('destroy').remove();
 					}
-				},
-				close: function (e) {
-					ccs_div.dialog('destroy').remove();
-				}
-			});
+				});
+			}
 		}
 	});
 
@@ -259,11 +263,19 @@ D3MSTreeContextMenu.prototype._init=function(){
 		self.tree.toggleHypotheticalNodes();
 	});
 
+	$(".clearSelection2").on("click", function(e) {
+		var items = self.meta_grid.grid.getData().getFilteredItems();
+		self.meta_grid.selectItems(items, false);
+	});
+	$(".selectAll2").on("click", function(e) {
+		var items = self.meta_grid.grid.getData().getFilteredItems();
+		self.meta_grid.selectItems(items, true);
+	});
+
+
 	$(".clearSelection").on("click", function(e) {
 		self.tree.clearSelection();
 	});
-	
-	
 	$(".selectAll").on("click", function(e) {
 		self.tree.selectAll();
 	});
@@ -275,6 +287,23 @@ D3MSTreeContextMenu.prototype._init=function(){
 		} else {
 			$('#metadata-div').hide(300);
 		}
+	});
+	$(".quick-gradient").click(function(e) {
+		var total_nodes = Object.keys(self.tree.node_map).length;
+		var category = $('#color-colname').val();
+		var tochange = "grouptype";
+		var value = "alphabetic";
+		self.tree.metadata_info[category][tochange] = value;
+		self.tree.changeCategory(category);
+		var category_info = the_tree.metadata_info[the_tree.display_category];
+		if (total_nodes !== category_info.category_num) {
+			category_info.category_num = total_nodes;
+			self.tree.changeCategory(category);
+		}
+		tochange = "colorscheme";
+		value = "gradient_cool"
+		self.tree.metadata_info[category][tochange] = value;
+		self.tree.changeCategory(category);
 	});
 	$(".select-group").click(function(e) {
 		var [category, group] = $(this).data('group');
@@ -386,9 +415,10 @@ D3MSTreeContextMenu.prototype._init=function(){
 
 	$("#group-num-input").on("change", function(e) {
 		var n = parseInt($("#group-num-input").val());
-		if ( n !== self.tree.category_num ) {
-			self.tree.category_num = n;
-			self.tree.changeCategory($("#metadata-select").val());
+		var category_info = the_tree.metadata_info[the_tree.display_category];
+		if (n !== category_info.category_num) {
+			category_info.category_num = n;
+			self.tree.changeCategory(the_tree.display_category);
 		}
 	})
 	.spinner({
@@ -408,6 +438,8 @@ D3MSTreeContextMenu.prototype._init=function(){
 
 D3MSTreeContextMenu.prototype._fill_metadata_option = function(source) {
 	if (! source) source = {};
+	$("#group-num-input").val(source.category_num ? source.category_num : 30)
+		.spinner("value", source.category_num ? source.category_num : 30);
 	$(".coltype").val(source.coltype ? source.coltype : 'character');
 	$(".grouptype").val(source.grouptype ? source.grouptype : 'size');
 	$(".colorscheme").val(source.colorscheme ? source.colorscheme : 'category');
@@ -443,15 +475,17 @@ D3MSTreeContextMenu.prototype._trigger_context=function(target, e) {
 		var category = this.tree.display_category;
 		if (category != 'nothing') {
 			if (! this.tree.metadata_info[category]) {
-				this.tree.metadata_info[category] = {coltype : 'character', grouptype : 'size', colorscheme : 'category', minnum: 0};
+				this.tree.metadata_info[category] = {category_num:30, coltype : 'character', grouptype : 'size', colorscheme : 'category', minnum: 0};
 			}
 			this._fill_metadata_option(this.tree.metadata_info[category]);
 		}
 		try {
 			$(".select-group").data('group', [category, d3.select(e.target).data()[0].real_group]);
 			$(".select-group").show();
+			$(".select-group-hr").show();
 		} catch(e) {
 			$(".select-group").hide();
+			$(".select-group-hr").hide();
 		}
 		$("#color-colname").empty().append(function() {
 			var col = Object.keys(self.tree.metadata_info).sort();
@@ -462,8 +496,6 @@ D3MSTreeContextMenu.prototype._trigger_context=function(target, e) {
 			return output.join('');
 		});
 		$("#color-colname").val(category);
-
-		$("#group-num-input").val(this.tree.category_num).spinner("value", this.tree.category_num);
 
 		$("#legend-svg-menu").show();
 		cntx.draggable().css("left", e.pageX).css("top", e.pageY).show();

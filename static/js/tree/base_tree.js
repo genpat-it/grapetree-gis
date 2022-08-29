@@ -780,7 +780,7 @@ D3BaseTree.prototype.constructor=D3BaseTree;
 */
 function D3BaseTree(element_id,metadata,height,width){
 	var self=this;
-	this.legend_div=$("<div>").css({"position":"absolute","overflow-x":"hidden"}).css({"top":"0px","right":"0px"}).draggable();
+	this.legend_div=$("<div>").css({"position":"absolute","overflow-x":"hidden"}).css({"top":"0px","right":"0px"}).draggable({ cancel: '.no-drag' });
 	this.scale_div=$("<div>").css({"position":"absolute","overflow-x":"hidden", "overflow-y":"hidden"}).css({"bottom":"100px","left":"20px"}).draggable();
 	this.container = $("#"+element_id)
 				    .css("position","fixed")
@@ -810,6 +810,8 @@ function D3BaseTree(element_id,metadata,height,width){
 	 .attr("width",this.width)
 	.attr("height",this.height)
 	.attr("id","mst-svg");
+	
+	this.svg.append('defs').html('<pattern id="pattern" patternUnits="userSpaceOnUse" width="8" height="8"> <image href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDI2LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAzOC40IDM4LjQiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDM4LjQgMzguNDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiNGRkZGRkY7fQoJLnN0MXtmaWxsOiNCREJEQkQ7fQo8L3N0eWxlPgo8cmVjdCB5PSIwIiBjbGFzcz0ic3QwIiB3aWR0aD0iMzguNCIgaGVpZ2h0PSIzOC40Ii8+CjxjaXJjbGUgY2xhc3M9InN0MSIgY3g9IjE5LjIiIGN5PSIxOS4yIiByPSI4LjUiLz4KPHBhdGggY2xhc3M9InN0MSIgZD0iTTM4LjQsOC41VjBIMzBDMzAsNC43LDMzLjcsOC41LDM4LjQsOC41eiIvPgo8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMzguNCwzMGMtNC43LDAtOC41LDMuOC04LjUsOC41aDguNVYzMHoiLz4KPHBhdGggY2xhc3M9InN0MSIgZD0iTTguNSwwSDB2OC41QzQuNyw4LjUsOC41LDQuNyw4LjUsMHoiLz4KPHBhdGggY2xhc3M9InN0MSIgZD0iTTAsMzB2OC41aDguNUM4LjUsMzMuNyw0LjcsMzAsMCwzMHoiLz4KPC9zdmc+Cg==" x="0" y="0" width="8" height="8"> </image> </pattern>');
 	
 	//legend stuff
 	this.node_map={};
@@ -1342,6 +1344,10 @@ D3BaseTree.prototype.updateLegend = function(title, ordered_groups){
 	});
 	legend_items = legend_items.enter().append('g').attr('class', 'legend-item').attr('transform', function(d, i){
 		return "translate(0," + ((i + 1) * 20 + 10) + ")";
+	}).attr('data-real-group-izsam',  function(it){
+		return it.real_group;
+	}).attr('data-group-colour-izsam',  function(it){
+		return it.group_colour;
 	});
 	/*
 	Create rect elements with group colours
@@ -1366,6 +1372,15 @@ D3BaseTree.prototype.updateLegend = function(title, ordered_groups){
 			name = name.substring(0,25)+"..."
 		}*/
 		return name;
+	}).on("click",function(data){
+		var obj={
+			category:self.display_category,
+			value:data.group,
+			target: $(this),
+			real: data.real_group,
+			colour:data.group_colour
+		};
+		self.legendItemTextClicked(obj)
 	});
 	/*
 	Update the legend title
@@ -1374,8 +1389,8 @@ D3BaseTree.prototype.updateLegend = function(title, ordered_groups){
 	legend.append('text').attr('class', 'legend-title').attr('x', 12).attr('y', 20).attr('font-weight', 'bold').attr("font-family", "Arial")
 	.text(this.metadata_info[title]['label']);
 	var legend_dim = legend_svg[0][0].getBBox();
-	legend_svg.attr('width', 300).attr('height', legend_dim.height + 10);
-	this.legend_div.width(300);
+	legend_svg.attr('width', 240).attr('height', legend_dim.height + 10);
+	this.legend_div.width(240);
 	var l_height = $("#legend-svg").height();
 	var height = l_height+10;
 	this.legend_div.css({"max-height":height+"px"});
@@ -1655,6 +1670,7 @@ D3BaseTree.prototype.brushStarted = function(){};
 D3BaseTree.prototype.brushing= function(extent){};
 D3BaseTree.prototype.brushEnded= function(extent){};
 D3BaseTree.prototype.legendItemClicked= function(obj){};
+D3BaseTree.prototype.legendItemTextClicked= function(obj){};
 
 /**
  * 
