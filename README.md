@@ -4,53 +4,63 @@ Project based on [GrapeTree](https://github.com/achtman-lab/GrapeTree), a fully 
 
 ## Instruction to run it locally
 
-To see the project locally we need to run a web server, node js works pretty fine.
+To see the project locally we need to run a web server, node packages http-server or live-server work pretty fine.
 
-### Install node js
+### Prerequisites
 
-Download the latest stable release of NodeJS from https://nodejs.org and install using all the default options.
+#### Node js
 
-### Install npm install -g http-server
+Download the latest stable release of NodeJS from https://nodejs.org and install it using all the default options.
 
-Install the http-server globally on your machine using the node package manager (npm) command line tool, this will allow you to run a web server from anywhere on your computer.
+#### Install and use http-server or live-server
+
+Now you will be able to install http-server or live-server globally on your machine using the node package manager (npm) command line tool, this will allow you to run a web server from anywhere on your computer.
+
+**http-server**
 
 Open the terminal and write:
 
 `npm install -g http-server`
 
-### Start a web server
-
-In terminal open the directory containing your static web files and start the server with the following command:
+To start a web server, in terminal open the directory containing your static web files and start the server with the following command:
 
 `http-server`
 
-#### Use live-server
+**live-server**
 
-npm install live-server -g
+`npm install live-server -g`
+
+To start a web server, in terminal open the directory containing your static web files and start the server with the following command:
 
 `live-server`
 
-### Source file in place
+### Run GrapeTree locally
 
-You can load data by url, in `tmp` folder you will find some differents data to load:
+Download the .zip of the code from this repository, then unzip on a directorry `DIR_GRAPETREE` (for example: `/tmp/grapetree-gis-main`).
 
-```
-?tree=/tmp/tree.nwk&metadata=/tmp/metadata.tsv&geo=/tmp/points.geojson
-```
+#### Source files in place
 
-Please make sure following files are in the right directory, according to the url.
+Produce your newick (`tree.nwk`) and metadata (`meta.tsv`) files and copy them inside `DIR_GRAPETREE`, then on terminal:
 
-### Load a compatible JSON file
+`live-server DIR_GRAPETREE`
 
-Dashboard allows you to download a JSON file including metadata and configurations.
+Now you will be able to load data by url in your web browser, for example:
 
-Generated JSON file can be loaded with the `Load GrapeTree` button present in `Inputs/Outputs` card.
+`http://localhost:8080?tree=tree.nwk&meta=meta.tsv`
+
+In the project you will find a `tmp` folder with some example data to load, you can use url to see them as well:
+
+`http://localhost:8080?tree=/tmp/tree.nwk&metadata=/tmp/metadata.tsv&geo=/tmp/points.geojson`
+
+#### Load a compatible JSON file
+
+Dashboard allows you to download a JSON file including metadata and configurations. Generated JSON file can be loaded with the `Load GrapeTree` button present in `Inputs/Outputs` card.
 
 ## Dev notes
 
 ### Zoom behaviour
 
- To remove the mousewheel behaviour for zoom, add `.on("wheel.zoom", null)` to base_tree.js on line 931 after `.on("dblclick.zoom", null)`. 
+To remove the mousewheel behaviour for zoom, add `.on("wheel.zoom", null)` to base_tree.js on line 931 after `.on("dblclick.zoom", null)`. 
 
 ### Original tree button: event behaviour description and changes - WIP
 
