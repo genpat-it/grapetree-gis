@@ -2,17 +2,17 @@
 
 Project based on [GrapeTree](https://github.com/achtman-lab/GrapeTree), a fully interactive, tree visualization program within EnteroBase, which supports facile manipulations of both tree layout and metadata. Please see more info [here](https://enterobase.readthedocs.io/en/latest/grapetree/grapetree-about.html).
 
-## Instruction to run it locally
+# Instruction to run it locally
 
 To see the project locally we need to run a web server, node packages http-server or live-server work pretty fine.
 
-### Prerequisites
+## Prerequisites
 
-#### Node js
+### Node js
 
 Download the latest stable release of NodeJS from https://nodejs.org and install it using all the default options.
 
-#### Install and use http-server or live-server
+### Install and use http-server or live-server
 
 Now you will be able to install http-server or live-server globally on your machine using the node package manager (npm) command line tool, this will allow you to run a web server from anywhere on your computer.
 
@@ -34,11 +34,11 @@ To start a web server, in terminal open the directory containing your static web
 
 `live-server`
 
-### Run GrapeTree locally
+## Run GrapeTree locally
 
 Download the .zip of the code from this repository, then unzip on a directorry `DIR_GRAPETREE` (for example: `/tmp/grapetree-gis-main`).
 
-#### Source files in place
+### Source files in place
 
 Produce your newick (`tree.nwk`) and metadata (`meta.tsv`) files and copy them inside `DIR_GRAPETREE`, then on terminal:
 
@@ -52,7 +52,7 @@ In the project you will find a `tmp` folder with some example data to load, you 
 
 `http://localhost:8080?tree=/tmp/tree.nwk&metadata=/tmp/metadata.tsv&geo=/tmp/points.geojson`
 
-#### Load a compatible JSON file
+### Load a compatible JSON file
 
 Dashboard allows you to download a JSON file including metadata and configurations. Generated JSON file can be loaded with the `Load GrapeTree` button present in `Inputs/Outputs` card.
 
