@@ -15,6 +15,11 @@ the_map.coordinates_delta = the_map.max_delta;
 the_map.clustering_base = 2; // changing the base value will change the sensibility of the geographical delta for clustering
 the_map.geojson = ''; // to be populated on loadJSON
 
+the_map.setGeoJSON = function (geoJ) {
+  the_map.geojson = geoJ;
+  console.log(the_map.geojson);
+}
+
 /**
  * 
  * HEX to RGB converter
@@ -723,16 +728,24 @@ the_map.reBuildGeoJSON = (data, delta, type, filter) => {
  * 
  */
 the_map.loadGeoJson = (delta, type, filter) => {
-  if (the_map.geojson && the_map.geojson.length > 0) {
-    var data = JSON.parse(the_map.geojson);
-    the_map.reBuildGeoJSON(data, delta, type, filter);
-  } else {
-    this.urlParams = new URLSearchParams(window.location.search);
-    this.geoPath = this.urlParams.get('geo');
-    $.getJSON(this.geoPath, (data) => {
-      the_map.geojson = JSON.stringify(data);
+  if ('geo' in global_params) {
+    if (the_map.geojson && the_map.geojson.length > 0) {
+      var data = JSON.parse(the_map.geojson);
       the_map.reBuildGeoJSON(data, delta, type, filter);
-    });
+    } else {
+      this.urlParams = new URLSearchParams(window.location.search);
+      this.geoPath = this.urlParams.get('geo');
+      $.getJSON(this.geoPath, (data) => {
+        the_map.geojson = JSON.stringify(data);
+        the_map.reBuildGeoJSON(data, delta, type, filter);
+      });
+    }
+  } else {
+    if (window.global_geoJ == undefined) {
+      console.log('Warning no geoJSON defined');
+    } else {
+      the_map.reBuildGeoJSON(window.global_geoJ, delta, type, filter);
+    }
   }
 } // loadGeoJson
 

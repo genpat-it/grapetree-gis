@@ -2,13 +2,31 @@
 
 ## grapetree_fileHandler.js
 
-### Line 83
+### Line 38
+
+Added to `loadNetFiles()`:
+
+```javascript
+function loadNetFiles() {
+  /* .... */
+  
+  // query string hash of parameters should be made available to all the app objects
+  MSFileChooser.params = params;
+	window.global_params = params;
+
+  /* .... */
+}
+```
+
+### Line 89
+
 From `url: 'https://enterobase.warwick.ac.uk/grapetree_remote/'+tree,` to `url: tree,` it allows to use relative url to get nwk file
 
-### Line 104
+### Line 112
+
 From `url: 'https://enterobase.warwick.ac.uk/grapetree_remote/'+metadata,` to `url: metadata,` it allows to use relative url for meta tsv file
 
-### Line 97
+### Line 103
 
 From:
 ```javascript
@@ -20,7 +38,7 @@ function loadNetFiles() {
   }
   /* .... */
 }
-````
+```
 
 To:
 ```javascript
@@ -35,10 +53,31 @@ function loadNetFiles() {
   /* .... */
 }
 ```
+### Line 236
 
-### Line 223
+Added Meta2GeoJSON Object to transform meta object in geoJSON points.
+
+### Line 325
 
 Added to `parseMetadata()`:
+
+```javascript
+function parseMetadata (msg,lines,header_index){
+  /* .... */
+  
+  if( Meta2GeoJSON.checkMeta4geo(options) ){ //options = hash of metadata titles 
+		var geoJ=Meta2GeoJSON.meta2GeoJson( meta );
+		window.global_geoJ = geoJ;
+	}else{
+		console.log('(GEO)WARNING: titles not found in metadata:' + Meta2GeoJSON.xName +','+ Meta2GeoJSON.yName);
+	}
+
+  /* .... */
+}
+```
+
+and:
+
 ```javascript
 function parseMetadata (msg,lines,header_index){
   /* .... */
@@ -47,10 +86,10 @@ function parseMetadata (msg,lines,header_index){
 }
 ```
 
-### Line 281
+### Line 456
 Fixed bug from `var notification = "<p style='font-size:10'>` to `var notification = "<p style='font-size:10px'>`
 
-### Line 293
+### Line 468
 From `.html(notification + "File Name: ")` to `.html(notification + "<label>File Name: </label>")'>` for ui improvement
 
 

@@ -66,6 +66,12 @@ function loadNetFiles() {
 		return result;
 	}
 	var params = getJsonFromUrl();
+	/////////////////////////////////////
+	// Modified to make available params in MSFileChooser
+	// TODO: (ADP) query string hash of parameters should be made available to all the app objects 
+	MSFileChooser.params = params;
+	window.global_params = params;
+	/////////////////////////////////////
 	var tree = null, metadata = null;
 	for (var key in params) {
 		params[key] = params[key].replace('www.dropbox.com', 'dl.dropboxusercontent.com')
@@ -220,6 +226,102 @@ function loadMetadataText(text){
 	}
 };
 
+/**
+ * 
+ * Meta2GeoJSON 
+ * Transform Meta Object in points geoJSON
+ * 
+ */
+/////////////////////////////////////////////////////////////////
+Meta2GeoJSON = {
+	//---------------------------------------------
+	// 
+	//---------------------------------------------
+	newGeoJson: function () {
+		return {
+			"features": [],
+			"name": "geopoints",
+			"type": "FeatureCollection",
+			"id_dashboard": "grapetree-gis"
+		};
+	}, //-------------------------------------
+	newPoint: function (h) {
+		return {
+			"geometry": {
+				"coordinates": [
+					h.x,
+					h.y
+				],
+				"type": "Point"
+			},
+			"type": "Feature",
+			"properties": {
+				"codice": h.id
+			}
+		};
+	}, //-------------------------------------
+
+	addNewPoint: function (geoJson, h) { //id,x,y
+		if (h == undefined || h.id == undefined || h.id.length == 0) {
+			return
+		};
+		h.x = Number.parseFloat(h.x);
+		h.y = Number.parseFloat(h.y);
+		if (Number.isNaN(h.x) || Number.isNaN(h.y)) {
+			console.log('Meta2GeoJSON.addNewPoint: lat lon not a number. lon:' + h.x + ' lat:' + h.y);
+			return
+		};
+		geoJson.features.push(this.newPoint(h));
+	}, //-------------------------------------
+
+	checkMeta4geo: function (htitles) { //htitles=hash Of Metadata Titles (CSV titles)
+		function chk(x, params, htitles) {
+			if (x in params && params[x] in htitles) {
+				console.log("(GEO) found metadata field '" + params[x] + "' as " + x);
+				return params[x];
+			}
+			if (x in htitles) {
+				console.log("(GEO) fallback: found metadata field '" + x + "' as " + x);
+				return x;
+			}
+			if (x in params && !(params[x] in htitles)) {
+				console.log("(GEO) WARNING: field NOT found in metadata: '" + params[x] + "' as " + x);
+			}
+			if (!(x in params) && !(x in htitles)) {
+				console.log("(GEO) WARNING: fallback field NOT found in metadata: '" + x + "' as " + x);
+			}
+			return '';
+		}
+
+		var params = MSFileChooser.params;
+		this.xName = chk("longitude", params, htitles);
+		this.yName = chk("latitude", params, htitles);
+		if (this.xName == '' || this.yName == '') {
+			return false;
+		}
+		return true;
+	}, //-------------------------------------
+
+	meta2GeoJsonLonLat: function (hashOfHash, lonName, latName) {
+		var geoJson = this.newGeoJson();
+		for (var id in hashOfHash) {
+			var h = hashOfHash[id]; //r=record
+			this.addNewPoint(geoJson, {
+				id: id,
+				x: h[lonName],
+				y: h[latName]
+			});
+		}
+		return geoJson;
+	}, //-------------------------------------
+
+	meta2GeoJson: function (hashOfHash) {
+		return this.meta2GeoJsonLonLat(hashOfHash, this.xName, this.yName);
+	} //-------------------------------------
+
+}
+/////////////////////////////////////////////////////////////////
+
 function parseMetadata (msg,lines,header_index){
 	if( msg === 'Error') {
 		alert('malformed metadata file');
@@ -243,6 +345,19 @@ function parseMetadata (msg,lines,header_index){
 	$("#metadata-select").val(category);
 	// $("#metadata-map-select").val(category);
 	the_tree.addMetadata(meta);
+
+	/////////////////////////////////////
+	// to be changed in this way for parameters &x=title_name_longitute&y=title_name_latitudine
+	if( Meta2GeoJSON.checkMeta4geo(options) ){ //options = hash of metadata titles 
+		var geoJ=Meta2GeoJSON.meta2GeoJson( meta );
+		// To be changed to not use global_geoJ as a global var but to use the_map object instead
+		// for example the_map.setGeoJSON(geoJ);
+		window.global_geoJ = geoJ;
+	}else{
+		console.log('(GEO)WARNING: titles not found in metadata:' + Meta2GeoJSON.xName +','+ Meta2GeoJSON.yName);
+	}	
+	/////////////////////////////////////
+
 	the_tree.changeCategory(category);
 
 	// to use original tree button we need tree_raw populated with an object containing also metadata, so we added the following line. Please find more in the README.md file under Dev notes paragraph

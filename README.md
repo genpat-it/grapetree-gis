@@ -46,11 +46,32 @@ Produce your newick (`tree.nwk`) and metadata (`meta.tsv`) files and copy them i
 
 Now you will be able to load data by url in your web browser, for example:
 
-`http://localhost:8080?tree=tree.nwk&meta=meta.tsv`
+`http://localhost:8080?tree=tree.nwk&metadata=metadata.tsv`
 
 In the project you will find a `tmp` folder with some example data to load, you can use url to see them as well:
 
 `http://localhost:8080?tree=/tmp/tree.nwk&metadata=/tmp/metadata.tsv&geo=/tmp/points.geojson`
+
+### Load geoJSON data
+
+The dashboard is able to interpret `.geojson` file passed as `geo` parameter by query string:
+
+`http://localhost:8080?tree=tree.nwk&metadata=metadata.tsv&geo=points.geojson`
+
+Alternatively you can integrate in `metadata.tsv` longitute and latitude values and pass them as query string parameters in the place of geoJSON. 
+
+For example, if in the `.tsv` you define `x` for longitude and `y` for latitude, just add `&longitude=x&latitude=y` in the url:
+
+`http://localhost:8080?tree=tree.nwk&metadata=metadata.tsv&longitude=x&latitude=y`
+
+Using our data example:
+
+`http://localhost:8080?tree=/tmp/tree.nwk&metadata=/tmp/metadata.tsv&longitude=x&latitude=y`
+
+**Important**
+If you use `longitude` and `latitude` to name coordinates in the `.tsv` file, there is no need to pass them as query string parameters, so simply use:
+
+`http://localhost:8080?tree=tree.nwk&metadata=metadata.tsv`
 
 ### Load a compatible JSON file
 
