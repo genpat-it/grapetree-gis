@@ -68,8 +68,9 @@ Using our data example:
 
 `http://localhost:8080?tree=/tmp/tree.nwk&metadata=/tmp/metadata.tsv&longitude=x&latitude=y`
 
-**Important**
-If you use `longitude` and `latitude` to name coordinates in the `.tsv` file, there is no need to pass them as query string parameters, so simply use:
+> **Important**
+>
+> If you use `longitude` and `latitude` to name coordinates in the `.tsv` file, there is no need to pass them as query string parameters, so simply use:
 
 `http://localhost:8080?tree=tree.nwk&metadata=metadata.tsv`
 
