@@ -417,7 +417,12 @@ function loadTreeText(tree){
 		if (!legend_tools) {
 			legend_tools = document.createElement('div');
 			legend_tools.setAttribute('id', 'legend-tools');
-			legend_tools.innerHTML = '<div class="no-drag legend-tool legend-tool-settings" onclick="toggleLegendSettings()"></div><div class="no-drag legend-tool legend-tool-select-all" onclick="legendSelectAll()"></div><div class="no-drag legend-tool legend-tool-invert-selection" onclick="legendInvertSelection()"></div><div class="no-drag legend-tool legend-tool-clean-selection" onclick="legendCleanSelection()"></div><div class="no-drag legend-tool legend-tool-reset" onclick="legendReset()"></div>';
+			legend_tools.innerHTML = '<div class="no-drag legend-tool legend-tool-settings" onclick="the_legend.toggleLegendSettings()"></div>\
+			<div class="no-drag legend-tool legend-tool-select-all" onclick="the_legend.legendSelectAll()"></div>\
+			<div class="no-drag legend-tool legend-tool-invert-selection" onclick="the_legend.legendInvertSelection()"></div>\
+			<div class="no-drag legend-tool legend-tool-clean-selection" onclick="the_legend.legendCleanSelection()"></div>\
+			<div class="no-drag legend-tool legend-tool-play-selection" onclick="the_legend.legendPlaySelection(this)"></div>\
+			<div class="no-drag legend-tool legend-tool-reset" onclick="the_legend.legendReset()"></div>';
 			svg_legend_parent.appendChild(legend_tools);
 		}
 	},500);

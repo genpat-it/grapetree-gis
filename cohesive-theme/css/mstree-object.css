@@ -281,8 +281,17 @@ label {
   background-image: url(../img/iconic/play-blu.svg);
 }
 
+.legend-tool-play-selection.pause {
+  background-image: url(../img/iconic/pause-white.svg);
+  background-image: url(../img/iconic/pause-blu.svg);
+}
+
 .legend-tool-play-selection:hover {
   background-image: url(../img/iconic/play-white.svg);
+}
+
+.legend-tool-play-selection.pause:hover {
+  background-image: url(../img/iconic/pause-white.svg);
 }
 
 .legend-tool-reset {

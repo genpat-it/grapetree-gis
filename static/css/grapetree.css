@@ -134,8 +134,7 @@ position: fixed;
  transform: translate(-50%, -50%);
  height:400px;
  width:600px;
- #border-style:solid;
-
+ border-style:solid;
 }
 #handler {
 	padding:10px 10px;
