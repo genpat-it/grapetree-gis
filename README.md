@@ -1,6 +1,8 @@
 # COHESIVE - Grapetree with GIS integration
 
+> 
 > * Please find new and updated version here: [https://github.com/genpat-it/grapetree-extended](https://github.com/genpat-it/grapetree-extended)
+>
 
 Project based on [GrapeTree](https://github.com/achtman-lab/GrapeTree), a fully interactive, tree visualization program within EnteroBase, which supports facile manipulations of both tree layout and metadata. Please see more info [here](https://enterobase.readthedocs.io/en/latest/grapetree/grapetree-about.html).
 
